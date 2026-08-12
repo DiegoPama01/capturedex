@@ -27,4 +27,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/health/", health_check),
     path("api/v1/pokemon/", include("pokemon.urls")),
+    path("api/v1/captures/", include("capture.urls")),
 ]

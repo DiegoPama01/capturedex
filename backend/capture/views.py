@@ -1,3 +1,66 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-# Create your views here.
+from capture.domain.calculators.generation_1 import (
+    GenerationOneCalculator,
+)
+from capture.domain.enums import BallType, StatusCondition
+from capture.domain.inputs import CaptureInput
+from pokemon.models import PokemonGenerationData
+
+from .serializers import CaptureCalculationInputSerializer
+
+
+class CaptureCalculationView(APIView):
+    def post(self, request):
+        serializer = CaptureCalculationInputSerializer(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        pokemon_data = get_object_or_404(
+            PokemonGenerationData.objects.select_related("pokemon"),
+            pokemon_id=data["pokemon_id"],
+            generation=data["generation"],
+        )
+
+        capture_input = CaptureInput(
+            generation=data["generation"],
+            catch_rate=pokemon_data.catch_rate,
+            max_hp=data["max_hp"],
+            current_hp=data["current_hp"],
+            status=StatusCondition(data["status"]),
+            ball=BallType(data["ball"]),
+            attempts=data["attempts"],
+        )
+
+        result = GenerationOneCalculator().calculate(capture_input)
+
+        return Response(
+            {
+                "pokemon": {
+                    "id": pokemon_data.pokemon.id,
+                    "national_dex_number": (
+                        pokemon_data.pokemon.national_dex_number
+                    ),
+                    "name": pokemon_data.pokemon.name,
+                    "sprite_url": pokemon_data.sprite_url,
+                    "catch_rate": pokemon_data.catch_rate,
+                },
+                "result": {
+                    "single_throw_probability": (
+                        result.single_throw_probability
+                    ),
+                    "cumulative_probability": (
+                        result.cumulative_probability
+                    ),
+                    "expected_throws": result.expected_throws,
+                    "guaranteed": result.guaranteed,
+                },
+                "calculation_details": result.calculation_details,
+            },
+            status=status.HTTP_200_OK,
+        )
