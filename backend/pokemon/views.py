@@ -1,11 +1,18 @@
 from rest_framework import filters, generics
+from rest_framework.pagination import PageNumberPagination
 
 from .models import Pokemon
 from .serializers import PokemonSerializer
 
 
+class GenerationOnePokemonPagination(PageNumberPagination):
+    page_size = 151
+    max_page_size = 151
+
+
 class PokemonListView(generics.ListAPIView):
     serializer_class = PokemonSerializer
+    pagination_class = GenerationOnePokemonPagination
     filter_backends = [filters.SearchFilter]
     search_fields = [
         "name",

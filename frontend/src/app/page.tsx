@@ -1,32 +1,12 @@
-import { getHealth } from "@/lib/api";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CalculatorShell } from "@/features/capture-calculator/components/calculator-shell";
+import { getPokemon } from "@/lib/api";
 
 export default async function Home() {
-  const health = await getHealth();
+  const response = await getPokemon();
 
   return (
     <main className="flex min-h-screen items-center justify-center p-6">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{health.application}</CardTitle>
-          <CardDescription>
-            Pokémon capture probability calculator
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          <Badge variant="secondary">
-            API: {health.status}
-          </Badge>
-        </CardContent>
-      </Card>
+      <CalculatorShell pokemon={response.results} />
     </main>
   );
 }
