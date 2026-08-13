@@ -31,12 +31,24 @@ import {
 
 type EncounterFormProps = {
   pokemon: Pokemon[];
+  generation: 1 | 2;
   attempts: number;
   isSubmitting: boolean;
+  isLoadingPokemon: boolean;
+  isLoadingMorePokemon: boolean;
+  hasMorePokemon: boolean;
   error: string | null;
   initialValues?: CaptureCalculationInput;
+  onGenerationChange: (generation: 1 | 2) => void;
+  onPokemonSearchChange: (search: string) => void;
+  onLoadMorePokemon: () => Promise<void> | void;
   onSubmit: (input: CaptureCalculationInput) => Promise<void> | void;
 };
+
+const generationOptions = [
+  { value: "1", label: "Generacion I" },
+  { value: "2", label: "Generacion II" },
+] as const;
 
 const statusOptions: Array<{
   value: StatusCondition;
@@ -73,6 +85,11 @@ const ballOptions: PokeballOption[] = [
   },
 ];
 
+const ballOptionsByGeneration: Record<1 | 2, PokeballOption[]> = {
+  1: ballOptions,
+  2: ballOptions,
+};
+
 function getOptionLabel<T extends string>(
   options: Array<{ value: T; label: string }>,
   value: T,
@@ -82,10 +99,17 @@ function getOptionLabel<T extends string>(
 
 export function EncounterForm({
   pokemon,
+  generation,
   attempts,
   isSubmitting,
+  isLoadingPokemon,
+  isLoadingMorePokemon,
+  hasMorePokemon,
   error,
   initialValues,
+  onGenerationChange,
+  onPokemonSearchChange,
+  onLoadMorePokemon,
   onSubmit,
 }: EncounterFormProps) {
   const [pokemonId, setPokemonId] = useState<number | undefined>(
@@ -101,6 +125,8 @@ export function EncounterForm({
   const [ball, setBall] = useState<BallType>(
     initialValues?.ball ?? "poke_ball",
   );
+
+  const availableBallOptions = ballOptionsByGeneration[generation];
 
   const selectedPokemon = pokemon.find((item) => item.id === pokemonId);
 
@@ -133,14 +159,15 @@ export function EncounterForm({
 
     return {
       pokemon_id: selectedPokemon.id,
-      generation: 1,
+      generation,
+      version_group: selectedPokemon.generation_data[0]?.version_group ?? "red-blue",
       max_hp: maxHp,
       current_hp: currentHp,
       status,
       ball,
       attempts,
     };
-  }, [attempts, ball, currentHp, formError, maxHp, selectedPokemon, status]);
+  }, [attempts, ball, currentHp, formError, generation, maxHp, selectedPokemon, status]);
 
   useEffect(() => {
     if (!input) {
@@ -167,11 +194,39 @@ export function EncounterForm({
 
       <CardContent>
         <div className="space-y-4">
+          <Field label="Generacion" htmlFor="generation">
+            <Select
+              value={String(generation)}
+              onValueChange={(value) => {
+                setPokemonId(undefined);
+                setBall("poke_ball");
+                onPokemonSearchChange("");
+                onGenerationChange(value === "2" ? 2 : 1);
+              }}
+            >
+              <SelectTrigger id="generation" className="h-10 w-full px-3 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="start">
+                {generationOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Pokemon" htmlFor="pokemon">
               <PokemonCombobox
                 pokemon={pokemon}
                 value={pokemonId}
+                isLoading={isLoadingPokemon}
+                isLoadingMore={isLoadingMorePokemon}
+                hasMore={hasMorePokemon}
+                onSearchChange={onPokemonSearchChange}
+                onReachEnd={onLoadMorePokemon}
                 onValueChange={(nextPokemonId) => {
                   setPokemonId(nextPokemonId);
                 }}
@@ -180,7 +235,7 @@ export function EncounterForm({
 
             <Field label="Pokeball" htmlFor="ball">
               <PokeballCombobox
-                options={ballOptions}
+                options={availableBallOptions}
                 value={ball}
                 onValueChange={setBall}
               />
@@ -189,7 +244,7 @@ export function EncounterForm({
 
           {selectedPokemon && (
             <p className="text-sm text-muted-foreground">
-              Tasa de captura: {selectedPokemon.generation_data[0]?.catch_rate}
+              Tasa de captura: {selectedPokemon.generation_data[0]?.catch_rate} · Version: {selectedPokemon.generation_data[0]?.version_group}
             </p>
           )}
 

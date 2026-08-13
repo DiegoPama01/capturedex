@@ -3,14 +3,15 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from capture.domain.calculators.generation_1 import (
-    GenerationOneCalculator,
-)
 from capture.domain.enums import BallType, StatusCondition
 from capture.domain.inputs import CaptureInput
 from pokemon.models import PokemonGenerationData
 
 from .serializers import CaptureCalculationInputSerializer
+
+from capture.domain.calculators.factory import (
+    get_capture_calculator,
+)
 
 
 class CaptureCalculationView(APIView):
@@ -25,6 +26,7 @@ class CaptureCalculationView(APIView):
             PokemonGenerationData.objects.select_related("pokemon"),
             pokemon_id=data["pokemon_id"],
             generation=data["generation"],
+            version_group=data["version_group"],
         )
 
         capture_input = CaptureInput(
@@ -36,8 +38,9 @@ class CaptureCalculationView(APIView):
             ball=BallType(data["ball"]),
             attempts=data["attempts"],
         )
-
-        result = GenerationOneCalculator().calculate(capture_input)
+        
+        calculator = get_capture_calculator(data["generation"])
+        result = calculator.calculate(capture_input)
 
         return Response(
             {

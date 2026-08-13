@@ -18,6 +18,7 @@ import type { CaptureCalculationResponse } from "../types/capture";
 
 type CaptureResultCardProps = {
   result: CaptureCalculationResponse | null;
+  generation: 1 | 2;
   attempts: number;
   isUpdatingAttempts?: boolean;
   onAttemptsChange?: (attempts: number) => void;
@@ -25,6 +26,7 @@ type CaptureResultCardProps = {
 
 export function CaptureResultCard({
   result,
+  generation,
   attempts,
   isUpdatingAttempts = false,
   onAttemptsChange,
@@ -60,7 +62,7 @@ export function CaptureResultCard({
   return (
     <Card className="overflow-hidden">
       <CardHeader className="items-center text-center">
-        <Badge variant="secondary">Generación I</Badge>
+        <Badge variant="secondary">{getGenerationLabel(generation)}</Badge>
 
         {result.pokemon.sprite_url && (
           <Image
@@ -145,6 +147,14 @@ function SingleProbabilitySection({ probability }: { probability: number }) {
       <Progress value={probability} />
     </div>
   );
+}
+
+function getGenerationLabel(generation: 1 | 2): string {
+  if (generation === 2) {
+    return "Generación II";
+  }
+
+  return "Generación I";
 }
 
 function CumulativeProbabilitySection({

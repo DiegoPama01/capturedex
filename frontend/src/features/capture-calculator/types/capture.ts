@@ -36,7 +36,8 @@ export type BallType =
 
 export type CaptureCalculationInput = {
   pokemon_id: number;
-  generation: 1;
+  generation: 1 | 2;
+  version_group: string;
   max_hp: number;
   current_hp: number;
   status: StatusCondition;

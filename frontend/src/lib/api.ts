@@ -8,13 +8,29 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://127.0.0.1:8000/api/v1";
 
-export async function getPokemon(
+type GetPokemonParams = {
+  search?: string;
+  generation?: 1 | 2;
+  page?: number;
+};
+
+export async function getPokemon({
   search = "",
-): Promise<PokemonListResponse> {
+  generation,
+  page,
+}: GetPokemonParams = {}): Promise<PokemonListResponse> {
   const params = new URLSearchParams();
 
   if (search) {
     params.set("search", search);
+  }
+
+  if (generation) {
+    params.set("generation", String(generation));
+  }
+
+  if (page) {
+    params.set("page", String(page));
   }
 
   const query = params.toString();

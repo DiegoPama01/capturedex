@@ -18,28 +18,50 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import type { Pokemon } from "@/features/capture-calculator/types/capture";
 import { cn } from "@/lib/utils";
-import type {
-  Pokemon,
-} from "@/features/capture-calculator/types/capture";
 
 type PokemonComboboxProps = {
   pokemon: Pokemon[];
   value?: number;
+  isLoading: boolean;
+  isLoadingMore: boolean;
+  hasMore: boolean;
+  onSearchChange: (value: string) => void;
+  onReachEnd: () => Promise<void> | void;
   onValueChange: (pokemonId: number) => void;
 };
 
 export function PokemonCombobox({
   pokemon,
   value,
+  isLoading,
+  isLoadingMore,
+  hasMore,
+  onSearchChange,
+  onReachEnd,
   onValueChange,
 }: PokemonComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const listId = React.useId();
+  const scrollRef = React.useRef<HTMLDivElement | null>(null);
 
-  const selectedPokemon = pokemon.find(
-    (item) => item.id === value,
-  );
+  const handleScroll = React.useCallback(() => {
+    const element = scrollRef.current;
+
+    if (!element || !hasMore || isLoadingMore) {
+      return;
+    }
+
+    const distanceToBottom =
+      element.scrollHeight - element.scrollTop - element.clientHeight;
+
+    if (distanceToBottom < 24) {
+      void onReachEnd();
+    }
+  }, [hasMore, isLoadingMore, onReachEnd]);
+
+  const selectedPokemon = pokemon.find((item) => item.id === value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -58,9 +80,7 @@ export function PokemonCombobox({
             <PokemonSprite pokemon={selectedPokemon} />
 
             <span className="truncate">
-              #{String(
-                selectedPokemon.national_dex_number,
-              ).padStart(3, "0")}{" "}
+              #{String(selectedPokemon.national_dex_number).padStart(3, "0")}{" "}
               {selectedPokemon.name}
             </span>
           </span>
@@ -76,54 +96,63 @@ export function PokemonCombobox({
         align="start"
       >
         <Command>
-          <CommandInput placeholder="Buscar Pokémon..." />
+          <CommandInput
+            placeholder="Buscar Pokémon..."
+            onValueChange={onSearchChange}
+          />
 
-          <CommandList id={listId}>
-            <CommandEmpty>
-              No se encontró ningún Pokémon.
-            </CommandEmpty>
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="max-h-72 overflow-y-auto"
+          >
+            <CommandList id={listId} className="max-h-none overflow-visible">
+              <CommandEmpty>
+                {isLoading
+                  ? "Cargando Pokémon..."
+                  : "No se encontró ningún Pokémon."}
+              </CommandEmpty>
 
-            <CommandGroup>
-              {pokemon.map((item) => (
-                <CommandItem
-                  key={item.id}
-                  data-checked={value === item.id}
-                  value={[
-                    item.name,
-                    item.slug,
-                    item.national_dex_number,
-                  ].join(" ")}
-                  onSelect={() => {
-                    onValueChange(item.id);
-                    setOpen(false);
-                  }}
-                >
-                  <PokemonSprite pokemon={item} />
-
-                  <span className="flex-1">
-                    #{String(
+              <CommandGroup>
+                {pokemon.map((item) => (
+                  <CommandItem
+                    key={item.id}
+                    data-checked={value === item.id}
+                    value={[
+                      item.name,
+                      item.slug,
                       item.national_dex_number,
-                    ).padStart(3, "0")}{" "}
-                    {item.name}
-                  </span>
+                    ].join(" ")}
+                    onSelect={() => {
+                      onValueChange(item.id);
+                      setOpen(false);
+                    }}
+                  >
+                    <PokemonSprite pokemon={item} />
 
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
+                    <span className="flex-1">
+                      #{String(item.national_dex_number).padStart(3, "0")}{" "}
+                      {item.name}
+                    </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+
+              {isLoadingMore ? (
+                <div className="px-2 py-3 text-center text-xs text-muted-foreground">
+                  Cargando más Pokémon...
+                </div>
+              ) : null}
+            </CommandList>
+          </div>
         </Command>
       </PopoverContent>
     </Popover>
   );
 }
 
-function PokemonSprite({
-  pokemon,
-}: {
-  pokemon: Pokemon;
-}) {
-  const sprite =
-    pokemon.generation_data[0]?.sprite_url;
+function PokemonSprite({ pokemon }: { pokemon: Pokemon }) {
+  const sprite = pokemon.generation_data[0]?.sprite_url;
 
   if (!sprite) {
     return <span className="size-8 shrink-0" />;

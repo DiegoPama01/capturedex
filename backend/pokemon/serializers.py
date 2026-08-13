@@ -15,10 +15,15 @@ class PokemonGenerationDataSerializer(serializers.ModelSerializer):
 
 
 class PokemonSerializer(serializers.ModelSerializer):
-    generation_data = PokemonGenerationDataSerializer(
-        many=True,
-        read_only=True,
-    )
+    generation_data = serializers.SerializerMethodField()
+
+    def get_generation_data(self, obj):
+        generation_data = getattr(
+            obj,
+            "filtered_generation_data",
+            obj.generation_data.all(),
+        )
+        return PokemonGenerationDataSerializer(generation_data, many=True).data
 
     class Meta:
         model = Pokemon

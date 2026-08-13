@@ -25,6 +25,8 @@ class Pokemon(models.Model):
 class PokemonGenerationData(models.Model):
     class VersionGroup(models.TextChoices):
         RED_BLUE = "red-blue", "Red/Blue"
+        GOLD_SILVER = "gold-silver", "Gold/Silver"
+        CRYSTAL = "crystal", "Crystal"
 
     pokemon = models.ForeignKey(
         Pokemon,
