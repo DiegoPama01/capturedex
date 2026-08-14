@@ -6,6 +6,7 @@ ARG NEXT_PUBLIC_API_URL=/api/v1
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 COPY package*.json ./
+RUN npm install -g npm@11.6.2
 RUN npm ci
 
 COPY . .
@@ -18,6 +19,7 @@ WORKDIR /app
 ARG NEXT_PUBLIC_API_URL=/api/v1
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
+RUN npm install -g npm@11.6.2
 COPY --from=builder /app ./
 
 EXPOSE 3000
