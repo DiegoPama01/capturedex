@@ -22,6 +22,7 @@ import type {
   CaptureCalculationInput,
   Pokemon,
   StatusCondition,
+  VersionGroup,
 } from "@/features/capture-calculator/types/capture";
 import { PokemonCombobox } from "./pokemon-combobox";
 import {
@@ -32,6 +33,7 @@ import {
 type EncounterFormProps = {
   pokemon: Pokemon[];
   generation: 1 | 2;
+  versionGroup: VersionGroup;
   attempts: number;
   isSubmitting: boolean;
   isLoadingPokemon: boolean;
@@ -39,15 +41,16 @@ type EncounterFormProps = {
   hasMorePokemon: boolean;
   error: string | null;
   initialValues?: CaptureCalculationInput;
-  onGenerationChange: (generation: 1 | 2) => void;
+  onVersionGroupChange: (versionGroup: VersionGroup) => void;
   onPokemonSearchChange: (search: string) => void;
   onLoadMorePokemon: () => Promise<void> | void;
   onSubmit: (input: CaptureCalculationInput) => Promise<void> | void;
 };
 
-const generationOptions = [
-  { value: "1", label: "Generacion I" },
-  { value: "2", label: "Generacion II" },
+const versionGroupOptions: Array<{ value: VersionGroup; label: string }> = [
+  { value: "red-blue", label: "Red / Blue" },
+  { value: "gold-silver", label: "Gold / Silver" },
+  { value: "crystal", label: "Crystal" },
 ] as const;
 
 const statusOptions: Array<{
@@ -100,6 +103,7 @@ function getOptionLabel<T extends string>(
 export function EncounterForm({
   pokemon,
   generation,
+  versionGroup,
   attempts,
   isSubmitting,
   isLoadingPokemon,
@@ -107,11 +111,12 @@ export function EncounterForm({
   hasMorePokemon,
   error,
   initialValues,
-  onGenerationChange,
+  onVersionGroupChange,
   onPokemonSearchChange,
   onLoadMorePokemon,
   onSubmit,
 }: EncounterFormProps) {
+  const [selectedPokemonSnapshot, setSelectedPokemonSnapshot] = useState<Pokemon | undefined>();
   const [pokemonId, setPokemonId] = useState<number | undefined>(
     initialValues?.pokemon_id,
   );
@@ -129,6 +134,10 @@ export function EncounterForm({
   const availableBallOptions = ballOptionsByGeneration[generation];
 
   const selectedPokemon = pokemon.find((item) => item.id === pokemonId);
+  const activePokemon = selectedPokemon ?? selectedPokemonSnapshot;
+  const selectedBall = availableBallOptions.some((option) => option.value === ball)
+    ? ball
+    : (availableBallOptions[0]?.value ?? "poke_ball");
 
   function parsePositiveInt(value: string, fallback: number) {
     const nextValue = Number.parseInt(value, 10);
@@ -153,21 +162,21 @@ export function EncounterForm({
   }, [currentHp, maxHp, selectedPokemon]);
 
   const input = useMemo<CaptureCalculationInput | null>(() => {
-    if (!selectedPokemon || formError) {
+    if (!activePokemon || formError) {
       return null;
     }
 
     return {
-      pokemon_id: selectedPokemon.id,
+      pokemon_id: activePokemon.id,
       generation,
-      version_group: selectedPokemon.generation_data[0]?.version_group ?? "red-blue",
+      version_group: versionGroup,
       max_hp: maxHp,
-      current_hp: currentHp,
-      status,
-      ball,
-      attempts,
-    };
-  }, [attempts, ball, currentHp, formError, generation, maxHp, selectedPokemon, status]);
+        current_hp: currentHp,
+        status,
+        ball: selectedBall,
+        attempts,
+      };
+  }, [activePokemon, attempts, currentHp, formError, generation, maxHp, selectedBall, status, versionGroup]);
 
   useEffect(() => {
     if (!input) {
@@ -194,21 +203,32 @@ export function EncounterForm({
 
       <CardContent>
         <div className="space-y-4">
-          <Field label="Generacion" htmlFor="generation">
+          <Field label="Versión" htmlFor="version-group">
             <Select
-              value={String(generation)}
+              value={versionGroup}
               onValueChange={(value) => {
-                setPokemonId(undefined);
-                setBall("poke_ball");
+                const nextVersionGroup = value as VersionGroup;
+                const nextGeneration = nextVersionGroup === "red-blue" ? 1 : 2;
+
+                if (
+                  activePokemon &&
+                  !isPokemonAvailableInGeneration(activePokemon, nextGeneration)
+                ) {
+                  setSelectedPokemonSnapshot(undefined);
+                  setPokemonId(undefined);
+                }
+
                 onPokemonSearchChange("");
-                onGenerationChange(value === "2" ? 2 : 1);
+                onVersionGroupChange(nextVersionGroup);
               }}
             >
-              <SelectTrigger id="generation" className="h-10 w-full px-3 text-sm">
-                <SelectValue />
+              <SelectTrigger id="version-group" className="h-10 w-full px-3 text-sm">
+                <SelectValue>
+                  {versionGroupOptions.find((option) => option.value === versionGroup)?.label}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent align="start">
-                {generationOptions.map((option) => (
+                {versionGroupOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -222,12 +242,15 @@ export function EncounterForm({
               <PokemonCombobox
                 pokemon={pokemon}
                 value={pokemonId}
+                selectedPokemon={activePokemon}
                 isLoading={isLoadingPokemon}
                 isLoadingMore={isLoadingMorePokemon}
                 hasMore={hasMorePokemon}
                 onSearchChange={onPokemonSearchChange}
                 onReachEnd={onLoadMorePokemon}
                 onValueChange={(nextPokemonId) => {
+                  const nextPokemon = pokemon.find((item) => item.id === nextPokemonId);
+                  setSelectedPokemonSnapshot(nextPokemon);
                   setPokemonId(nextPokemonId);
                 }}
               />
@@ -236,15 +259,15 @@ export function EncounterForm({
             <Field label="Pokeball" htmlFor="ball">
               <PokeballCombobox
                 options={availableBallOptions}
-                value={ball}
+                value={selectedBall}
                 onValueChange={setBall}
               />
             </Field>
           </div>
 
-          {selectedPokemon && (
+          {activePokemon && (
             <p className="text-sm text-muted-foreground">
-              Tasa de captura: {selectedPokemon.generation_data[0]?.catch_rate} · Version: {selectedPokemon.generation_data[0]?.version_group}
+              Tasa de captura: {activePokemon.generation_data[0]?.catch_rate ?? "-"} · Versión: {versionGroupOptions.find((option) => option.value === versionGroup)?.label}
             </p>
           )}
 
@@ -304,7 +327,7 @@ export function EncounterForm({
             <p className="text-sm text-destructive">{formError ?? error}</p>
           )}
 
-          {selectedPokemon && !formError && (
+          {activePokemon && !formError && (
             <p className="text-xs text-muted-foreground">
               {isSubmitting ? "Recalculando..." : "Se recalcula automaticamente al cambiar los valores."}
             </p>
@@ -313,6 +336,15 @@ export function EncounterForm({
       </CardContent>
     </Card>
   );
+}
+
+function isPokemonAvailableInGeneration(pokemon: Pokemon, generation: 1 | 2): boolean {
+  const maxDexByGeneration = {
+    1: 151,
+    2: 251,
+  } as const;
+
+  return pokemon.national_dex_number <= maxDexByGeneration[generation];
 }
 
 function Field({

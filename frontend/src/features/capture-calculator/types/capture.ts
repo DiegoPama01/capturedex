@@ -5,6 +5,8 @@ export type GenerationData = {
   sprite_url: string;
 };
 
+export type VersionGroup = "red-blue" | "gold-silver" | "crystal";
+
 export type Pokemon = {
   id: number;
   national_dex_number: number;
@@ -37,7 +39,7 @@ export type BallType =
 export type CaptureCalculationInput = {
   pokemon_id: number;
   generation: 1 | 2;
-  version_group: string;
+  version_group: VersionGroup;
   max_hp: number;
   current_hp: number;
   status: StatusCondition;

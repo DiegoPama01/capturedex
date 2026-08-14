@@ -7,6 +7,7 @@ import type {
   CaptureCalculationInput,
   CaptureCalculationResponse,
   Pokemon,
+  VersionGroup,
 } from "@/features/capture-calculator/types/capture";
 import { calculateCapture, getPokemon } from "@/lib/api";
 
@@ -17,7 +18,7 @@ type CalculatorShellProps = {
 export function CalculatorShell({
   pokemon,
 }: CalculatorShellProps) {
-  const [generation, setGeneration] = useState<1 | 2>(1);
+  const [versionGroup, setVersionGroup] = useState<VersionGroup>("red-blue");
   const [pokemonOptions, setPokemonOptions] = useState<Pokemon[]>(pokemon);
   const [pokemonSearch, setPokemonSearch] = useState("");
   const [pokemonPage, setPokemonPage] = useState(1);
@@ -33,6 +34,8 @@ export function CalculatorShell({
     useState<CaptureCalculationInput>();
   const requestIdRef = useRef(0);
 
+  const generation = versionGroup === "red-blue" ? 1 : 2;
+
   useEffect(() => {
     requestIdRef.current += 1;
     const requestId = requestIdRef.current;
@@ -45,6 +48,7 @@ export function CalculatorShell({
         const response = await getPokemon({
           search: pokemonSearch,
           generation,
+          versionGroup,
           page: 1,
         });
 
@@ -56,7 +60,6 @@ export function CalculatorShell({
         setPokemonPage(1);
         setHasMorePokemon(response.next !== null);
         setResult(null);
-        setLastEncounter(undefined);
       } catch {
         if (requestId !== requestIdRef.current) {
           return;
@@ -66,7 +69,6 @@ export function CalculatorShell({
         setPokemonPage(1);
         setHasMorePokemon(false);
         setResult(null);
-        setLastEncounter(undefined);
         setError("No se pudo cargar la lista de Pokemon.");
       } finally {
         if (requestId === requestIdRef.current) {
@@ -76,7 +78,7 @@ export function CalculatorShell({
     }
 
     void loadPokemon();
-  }, [generation, pokemonSearch]);
+  }, [generation, pokemonSearch, versionGroup]);
 
   const handleLoadMorePokemon = useCallback(async () => {
     if (isLoadingPokemon || isLoadingMorePokemon || !hasMorePokemon) {
@@ -90,6 +92,7 @@ export function CalculatorShell({
       const response = await getPokemon({
         search: pokemonSearch,
         generation,
+        versionGroup,
         page: nextPage,
       });
 
@@ -101,7 +104,7 @@ export function CalculatorShell({
     } finally {
       setIsLoadingMorePokemon(false);
     }
-  }, [generation, hasMorePokemon, isLoadingMorePokemon, isLoadingPokemon, pokemonPage, pokemonSearch]);
+  }, [generation, hasMorePokemon, isLoadingMorePokemon, isLoadingPokemon, pokemonPage, pokemonSearch, versionGroup]);
 
   const handleCalculate = useCallback(async (input: CaptureCalculationInput) => {
     setIsCalculating(true);
@@ -137,6 +140,7 @@ export function CalculatorShell({
       <EncounterForm
         pokemon={pokemonOptions}
         generation={generation}
+        versionGroup={versionGroup}
         attempts={attempts}
         isSubmitting={isCalculating || isLoadingPokemon}
         isLoadingPokemon={isLoadingPokemon}
@@ -144,7 +148,7 @@ export function CalculatorShell({
         hasMorePokemon={hasMorePokemon}
         error={error}
         initialValues={lastEncounter}
-        onGenerationChange={setGeneration}
+        onVersionGroupChange={setVersionGroup}
         onPokemonSearchChange={setPokemonSearch}
         onLoadMorePokemon={handleLoadMorePokemon}
         onSubmit={handleCalculate}
@@ -152,7 +156,7 @@ export function CalculatorShell({
 
       <CaptureResultCard
         result={result}
-        generation={generation}
+        versionGroup={versionGroup}
         attempts={attempts}
         isUpdatingAttempts={isCalculating}
         onAttemptsChange={handleAttemptsChange}

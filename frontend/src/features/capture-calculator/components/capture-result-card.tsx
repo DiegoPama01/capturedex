@@ -14,11 +14,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import type { CaptureCalculationResponse } from "../types/capture";
+import type {
+  CaptureCalculationResponse,
+  VersionGroup,
+} from "../types/capture";
 
 type CaptureResultCardProps = {
   result: CaptureCalculationResponse | null;
-  generation: 1 | 2;
+  versionGroup: VersionGroup;
   attempts: number;
   isUpdatingAttempts?: boolean;
   onAttemptsChange?: (attempts: number) => void;
@@ -26,7 +29,7 @@ type CaptureResultCardProps = {
 
 export function CaptureResultCard({
   result,
-  generation,
+  versionGroup,
   attempts,
   isUpdatingAttempts = false,
   onAttemptsChange,
@@ -62,7 +65,7 @@ export function CaptureResultCard({
   return (
     <Card className="overflow-hidden">
       <CardHeader className="items-center text-center">
-        <Badge variant="secondary">{getGenerationLabel(generation)}</Badge>
+        <Badge variant="secondary">{getVersionGroupLabel(versionGroup)}</Badge>
 
         {result.pokemon.sprite_url && (
           <Image
@@ -149,12 +152,16 @@ function SingleProbabilitySection({ probability }: { probability: number }) {
   );
 }
 
-function getGenerationLabel(generation: 1 | 2): string {
-  if (generation === 2) {
-    return "Generación II";
+function getVersionGroupLabel(versionGroup: VersionGroup): string {
+  if (versionGroup === "gold-silver") {
+    return "Gold / Silver";
   }
 
-  return "Generación I";
+  if (versionGroup === "crystal") {
+    return "Crystal";
+  }
+
+  return "Red / Blue";
 }
 
 function CumulativeProbabilitySection({

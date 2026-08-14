@@ -2,6 +2,7 @@ import type {
   CaptureCalculationInput,
   CaptureCalculationResponse,
   PokemonListResponse,
+  VersionGroup,
 } from "@/features/capture-calculator/types/capture";
 
 const API_URL =
@@ -11,12 +12,14 @@ const API_URL =
 type GetPokemonParams = {
   search?: string;
   generation?: 1 | 2;
+  versionGroup?: VersionGroup;
   page?: number;
 };
 
 export async function getPokemon({
   search = "",
   generation,
+  versionGroup,
   page,
 }: GetPokemonParams = {}): Promise<PokemonListResponse> {
   const params = new URLSearchParams();
@@ -27,6 +30,10 @@ export async function getPokemon({
 
   if (generation) {
     params.set("generation", String(generation));
+  }
+
+  if (versionGroup) {
+    params.set("version_group", versionGroup);
   }
 
   if (page) {

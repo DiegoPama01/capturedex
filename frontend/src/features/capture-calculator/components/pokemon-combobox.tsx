@@ -18,12 +18,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { Pokemon } from "@/features/capture-calculator/types/capture";
+import type {
+  Pokemon,
+} from "@/features/capture-calculator/types/capture";
 import { cn } from "@/lib/utils";
 
 type PokemonComboboxProps = {
   pokemon: Pokemon[];
   value?: number;
+  selectedPokemon?: Pokemon;
   isLoading: boolean;
   isLoadingMore: boolean;
   hasMore: boolean;
@@ -35,6 +38,7 @@ type PokemonComboboxProps = {
 export function PokemonCombobox({
   pokemon,
   value,
+  selectedPokemon,
   isLoading,
   isLoadingMore,
   hasMore,
@@ -61,7 +65,8 @@ export function PokemonCombobox({
     }
   }, [hasMore, isLoadingMore, onReachEnd]);
 
-  const selectedPokemon = pokemon.find((item) => item.id === value);
+  const selectedPokemonOption =
+    pokemon.find((item) => item.id === value) ?? selectedPokemon;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -75,13 +80,13 @@ export function PokemonCombobox({
           "h-10 w-full min-w-0 justify-between px-3 text-sm",
         )}
       >
-        {selectedPokemon ? (
+        {selectedPokemonOption ? (
           <span className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
-            <PokemonSprite pokemon={selectedPokemon} />
+            <PokemonSprite pokemon={selectedPokemonOption} />
 
             <span className="truncate">
-              #{String(selectedPokemon.national_dex_number).padStart(3, "0")}{" "}
-              {selectedPokemon.name}
+              #{String(selectedPokemonOption.national_dex_number).padStart(3, "0")}{" "}
+              {selectedPokemonOption.name}
             </span>
           </span>
         ) : (
