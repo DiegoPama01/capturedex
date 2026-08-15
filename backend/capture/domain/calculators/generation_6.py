@@ -46,6 +46,7 @@ class GenerationSixCalculator(BaseCaptureCalculator):
                     has_caught_species_before=capture_input.has_caught_species_before,
                     is_water_type=capture_input.is_water_type,
                     is_bug_type=capture_input.is_bug_type,
+                    is_ultra_beast=capture_input.is_ultra_beast,
                     evolves_with_moon_stone=capture_input.evolves_with_moon_stone,
                     is_fleeing_species=capture_input.is_fleeing_species,
                     is_same_species=capture_input.is_same_species,

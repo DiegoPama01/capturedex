@@ -28,6 +28,7 @@ class GenerationOneBallRules(BaseBallRules[GenerationOneBallEffect]):
             automatic_capture=True,
         ),
     }
+    supported_balls = set(_BALL_EFFECTS.keys())
 
     def resolve(
         self,

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Generic, TypeVar
 
 from capture.domain.balls.context import BallContext
+from capture.domain.enums import BallType
 
 
 @dataclass(frozen=True)
@@ -29,6 +30,7 @@ BallEffectT = TypeVar("BallEffectT", covariant=True)
 
 class BaseBallRules(ABC, Generic[BallEffectT]):
     generation: int
+    supported_balls: set[BallType]
 
     @abstractmethod
     def resolve(self, context: BallContext) -> BallEffectT:

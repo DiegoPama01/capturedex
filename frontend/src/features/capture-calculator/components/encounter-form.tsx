@@ -44,7 +44,6 @@ type EncounterFormProps = {
   generation: Generation;
   versionGroup: VersionGroup;
   attempts: number;
-  isSubmitting: boolean;
   isLoadingPokemon: boolean;
   isLoadingMorePokemon: boolean;
   hasMorePokemon: boolean;
@@ -290,7 +289,6 @@ export function EncounterForm({
   generation,
   versionGroup,
   attempts,
-  isSubmitting,
   isLoadingPokemon,
   isLoadingMorePokemon,
   hasMorePokemon,
@@ -352,7 +350,6 @@ export function EncounterForm({
     ? ball
     : (availableBallOptions[0]?.value ?? "poke_ball");
   const shouldShowBallContext = selectedBall in ballContextFieldsByBall;
-  const activeBallContextFields = ballContextFieldsByBall[selectedBall] ?? [];
 
   function parsePositiveInt(value: string, fallback: number) {
     const nextValue = Number.parseInt(value, 10);

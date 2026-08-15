@@ -8,6 +8,20 @@ from capture.domain.enums import BallType
 
 class GenerationTwoBallRules(BaseBallRules[GenerationTwoBallEffect]):
     generation = 2
+    supported_balls = {
+        BallType.POKE_BALL,
+        BallType.GREAT_BALL,
+        BallType.ULTRA_BALL,
+        BallType.MASTER_BALL,
+        BallType.FRIEND_BALL,
+        BallType.MOON_BALL,
+        BallType.FAST_BALL,
+        BallType.LOVE_BALL,
+        BallType.LEVEL_BALL,
+        BallType.LURE_BALL,
+        BallType.SPORT_BALL,
+        BallType.HEAVY_BALL,
+    }
 
     def resolve(
         self,

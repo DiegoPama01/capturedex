@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+from capture.domain.balls.factory import get_ball_rules
 from capture.domain.enums import BallType, StatusCondition
 from pokemon.version_groups import (
     DEFAULT_VERSION_GROUP_BY_GENERATION,
@@ -104,6 +104,7 @@ class CaptureCalculationInputSerializer(serializers.Serializer):
         self._validate_hp(attrs)
         self._apply_default_version_group(attrs)
         self._validate_version_group(attrs)
+        self._validate_ball(attrs)
 
         return attrs
 
@@ -142,6 +143,22 @@ class CaptureCalculationInputSerializer(serializers.Serializer):
                     "version_group": (
                         f"Version group '{version_group}' does not "
                         f"belong to Generation {generation}."
+                    )
+                }
+            )
+
+    @staticmethod
+    def _validate_ball(attrs) -> None:
+        generation = attrs["generation"]
+        ball = attrs["ball"]
+
+        supported_balls = get_ball_rules(generation).supported_balls
+
+        if BallType(ball) not in supported_balls:
+            raise serializers.ValidationError(
+                {
+                    "ball": (
+                        f"Ball '{ball}' is not supported in Generation {generation}."
                     )
                 }
             )

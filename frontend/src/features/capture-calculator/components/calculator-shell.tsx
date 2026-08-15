@@ -143,7 +143,6 @@ export function CalculatorShell({
         generation={generation}
         versionGroup={versionGroup}
         attempts={attempts}
-        isSubmitting={isCalculating || isLoadingPokemon}
         isLoadingPokemon={isLoadingPokemon}
         isLoadingMorePokemon={isLoadingMorePokemon}
         hasMorePokemon={hasMorePokemon}
