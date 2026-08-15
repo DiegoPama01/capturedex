@@ -32,24 +32,63 @@ class CaptureCalculationInputSerializer(serializers.Serializer):
     )
 
     status = serializers.ChoiceField(
-        choices=[
-            status.value
-            for status in StatusCondition
-        ],
+        choices=[status.value for status in StatusCondition],
         default=StatusCondition.NONE.value,
     )
 
     ball = serializers.ChoiceField(
-        choices=[
-            ball.value
-            for ball in BallType
-        ],
+        choices=[ball.value for ball in BallType],
     )
 
     attempts = serializers.IntegerField(
         min_value=1,
         max_value=1000,
         default=1,
+    )
+
+    player_pokemon_level = serializers.IntegerField(
+        min_value=1,
+        max_value=100,
+        required=False,
+        allow_null=True,
+    )
+
+    wild_pokemon_level = serializers.IntegerField(
+        min_value=1,
+        max_value=100,
+        required=False,
+        allow_null=True,
+    )
+
+    wild_pokemon_weight_kg = serializers.FloatField(
+        min_value=0,
+        required=False,
+        allow_null=True,
+    )
+
+    is_fishing_encounter = serializers.BooleanField(
+        required=False,
+        default=False,
+    )
+
+    evolves_with_moon_stone = serializers.BooleanField(
+        required=False,
+        default=False,
+    )
+
+    is_fleeing_species = serializers.BooleanField(
+        required=False,
+        default=False,
+    )
+
+    is_same_species = serializers.BooleanField(
+        required=False,
+        default=False,
+    )
+
+    is_opposite_gender = serializers.BooleanField(
+        required=False,
+        default=False,
     )
 
     def validate(self, attrs):
@@ -61,32 +100,28 @@ class CaptureCalculationInputSerializer(serializers.Serializer):
     @staticmethod
     def _validate_hp(attrs) -> None:
         if attrs["current_hp"] > attrs["max_hp"]:
-            raise serializers.ValidationError({
-                "current_hp": (
-                    "Current HP cannot exceed maximum HP."
-                )
-            })
+            raise serializers.ValidationError(
+                {"current_hp": ("Current HP cannot exceed maximum HP.")}
+            )
 
     @staticmethod
     def _validate_version_group(attrs) -> None:
         generation = attrs["generation"]
         version_group = attrs["version_group"]
 
-        supported_version_groups = (
-            SUPPORTED_VERSION_GROUPS.get(generation)
-        )
+        supported_version_groups = SUPPORTED_VERSION_GROUPS.get(generation)
 
         if supported_version_groups is None:
-            raise serializers.ValidationError({
-                "generation": (
-                    f"Generation {generation} is not supported."
-                )
-            })
+            raise serializers.ValidationError(
+                {"generation": (f"Generation {generation} is not supported.")}
+            )
 
         if version_group not in supported_version_groups:
-            raise serializers.ValidationError({
-                "version_group": (
-                    f"Version group '{version_group}' does not "
-                    f"belong to Generation {generation}."
-                )
-            })
+            raise serializers.ValidationError(
+                {
+                    "version_group": (
+                        f"Version group '{version_group}' does not "
+                        f"belong to Generation {generation}."
+                    )
+                }
+            )

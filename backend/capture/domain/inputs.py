@@ -12,6 +12,14 @@ class CaptureInput:
     status: StatusCondition
     ball: BallType
     attempts: int = 1
+    player_pokemon_level: int | None = None
+    wild_pokemon_level: int | None = None
+    wild_pokemon_weight_kg: float | None = None
+    is_fishing_encounter: bool = False
+    evolves_with_moon_stone: bool = False
+    is_fleeing_species: bool = False
+    is_same_species: bool = False
+    is_opposite_gender: bool = False
 
     SUPPORTED_GENERATIONS = (1, 2)
 
@@ -30,3 +38,18 @@ class CaptureInput:
 
         if not 1 <= self.attempts <= 1000:
             raise ValueError("Attempts must be between 1 and 1000.")
+
+        if (
+            self.player_pokemon_level is not None
+            and not 1 <= self.player_pokemon_level <= 100
+        ):
+            raise ValueError("Player Pokemon level must be between 1 and 100.")
+
+        if (
+            self.wild_pokemon_level is not None
+            and not 1 <= self.wild_pokemon_level <= 100
+        ):
+            raise ValueError("Wild Pokemon level must be between 1 and 100.")
+
+        if self.wild_pokemon_weight_kg is not None and self.wild_pokemon_weight_kg < 0:
+            raise ValueError("Wild Pokemon weight must be greater than or equal to 0.")

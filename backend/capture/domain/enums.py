@@ -15,4 +15,11 @@ class BallType(StrEnum):
     GREAT_BALL = "great_ball"
     ULTRA_BALL = "ultra_ball"
     MASTER_BALL = "master_ball"
-
+    FRIEND_BALL = "friend_ball"
+    MOON_BALL = "moon_ball"
+    FAST_BALL = "fast_ball"
+    LOVE_BALL = "love_ball"
+    LEVEL_BALL = "level_ball"
+    LURE_BALL = "lure_ball"
+    SPORT_BALL = "sport_ball"
+    HEAVY_BALL = "heavy_ball"
