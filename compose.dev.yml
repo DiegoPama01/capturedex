@@ -1,0 +1,69 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: capturedex-dev-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: capturedex
+      POSTGRES_USER: capturedex
+      POSTGRES_PASSWORD: capturedex
+
+    volumes:
+      - capturedex_dev_db:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U capturedex -d capturedex"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+
+    container_name: capturedex-dev-backend
+
+    command: python manage.py runserver 0.0.0.0:8000
+
+    volumes:
+      - ./backend:/app
+
+    environment:
+      DATABASE_URL: postgresql://capturedex:capturedex@db:5432/capturedex
+      DJANGO_SECRET_KEY: local-development-secret-key
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
+      POKEAPI_BASE_URL: https://pokeapi.co/api/v2/
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+
+    container_name: capturedex-dev-frontend
+
+    volumes:
+      - ./frontend:/app
+      - capturedex_node_modules:/app/node_modules
+
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      INTERNAL_API_URL: http://backend:8000/api/v1
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - backend
+
+volumes:
+  capturedex_dev_db:
+  capturedex_node_modules:
