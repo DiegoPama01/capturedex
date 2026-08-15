@@ -28,24 +28,25 @@ function Accordion({
   children: React.ReactNode;
 }) {
   const [internalValue, setInternalValue] = React.useState<string | undefined>(value);
-
-  React.useEffect(() => {
-    setInternalValue(value);
-  }, [value]);
+  const currentValue = value ?? internalValue;
 
   const contextValue = React.useMemo<AccordionContextValue>(
     () => ({
-      value: internalValue,
+      value: currentValue,
       collapsible,
       setValue: (nextValue) => {
         if (type !== "single") {
           return;
         }
 
+        if (value !== undefined) {
+          return;
+        }
+
         setInternalValue(nextValue);
       },
     }),
-    [collapsible, internalValue, type],
+    [collapsible, currentValue, type, value],
   );
 
   return (
