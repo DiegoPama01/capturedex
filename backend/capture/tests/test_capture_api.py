@@ -69,6 +69,52 @@ class CaptureCalculationApiTests(APITestCase):
             sprite_url="https://example.com/magnemite.png",
         )
 
+        wingull = Pokemon.objects.create(
+            national_dex_number=278,
+            name="Wingull",
+            slug="wingull",
+            weight_kg=9.5,
+            types=["water", "flying"],
+        )
+
+        PokemonGenerationData.objects.create(
+            pokemon=wingull,
+            generation=3,
+            version_group=(PokemonGenerationData.VersionGroup.RUBY_SAPPHIRE),
+            catch_rate=190,
+            sprite_url="https://example.com/wingull-rs.png",
+        )
+
+        zubat = Pokemon.objects.create(
+            national_dex_number=41,
+            name="Zubat",
+            slug="zubat",
+            weight_kg=7.5,
+        )
+
+        PokemonGenerationData.objects.create(
+            pokemon=zubat,
+            generation=4,
+            version_group=(PokemonGenerationData.VersionGroup.DIAMOND_PEARL),
+            catch_rate=255,
+            sprite_url="https://example.com/zubat-dp.png",
+        )
+
+        munna = Pokemon.objects.create(
+            national_dex_number=517,
+            name="Munna",
+            slug="munna",
+            weight_kg=23.3,
+        )
+
+        PokemonGenerationData.objects.create(
+            pokemon=munna,
+            generation=5,
+            version_group=(PokemonGenerationData.VersionGroup.BLACK_WHITE),
+            catch_rate=190,
+            sprite_url="https://example.com/munna-bw.png",
+        )
+
         self.valid_payload = {
             "pokemon_id": pokemon.id,
             "generation": 1,
@@ -205,4 +251,81 @@ class CaptureCalculationApiTests(APITestCase):
         self.assertEqual(
             response.data["calculation_details"]["modified_catch_rate"],
             255,
+        )
+
+    def test_generation_three_uses_default_version_group(self) -> None:
+        payload = {
+            "pokemon_id": Pokemon.objects.get(slug="wingull").id,
+            "generation": 3,
+            "max_hp": 100,
+            "current_hp": 100,
+            "status": "none",
+            "ball": "dive_ball",
+            "is_surfing_encounter": True,
+        }
+
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data["calculation_details"]["modified_catch_rate"],
+            255,
+        )
+
+    def test_generation_three_uses_type_metadata_automatically(self) -> None:
+        payload = {
+            "pokemon_id": Pokemon.objects.get(slug="wingull").id,
+            "generation": 3,
+            "version_group": "ruby-sapphire",
+            "max_hp": 100,
+            "current_hp": 100,
+            "status": "none",
+            "ball": "net_ball",
+        }
+
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data["calculation_details"]["modified_catch_rate"],
+            255,
+        )
+
+    def test_generation_four_dusk_ball_uses_dark_location_flag(self) -> None:
+        payload = {
+            "pokemon_id": Pokemon.objects.get(slug="zubat").id,
+            "generation": 4,
+            "version_group": "diamond-pearl",
+            "max_hp": 100,
+            "current_hp": 100,
+            "status": "none",
+            "ball": "dusk_ball",
+            "is_dark_location": True,
+        }
+
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data["calculation_details"]["modified_catch_rate"],
+            255,
+        )
+
+    def test_generation_five_dream_ball_matches_poke_ball_outside_park(self) -> None:
+        payload = {
+            "pokemon_id": Pokemon.objects.get(slug="munna").id,
+            "generation": 5,
+            "version_group": "black-white",
+            "max_hp": 100,
+            "current_hp": 100,
+            "status": "sleep",
+            "ball": "dream_ball",
+        }
+
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data["calculation_details"]["modified_catch_rate"],
+            190,
         )

@@ -18,6 +18,8 @@ class Pokemon(models.Model):
         default=0,
         validators=[MinValueValidator(0)],
     )
+    base_speed = models.PositiveSmallIntegerField(default=0)
+    types = models.JSONField(default=list, blank=True)
     evolves_with_moon_stone = models.BooleanField(default=False)
     is_fleeing_species = models.BooleanField(default=False)
 
@@ -35,6 +37,14 @@ class PokemonGenerationData(models.Model):
         RED_BLUE = "red-blue", "Red/Blue"
         GOLD_SILVER = "gold-silver", "Gold/Silver"
         CRYSTAL = "crystal", "Crystal"
+        RUBY_SAPPHIRE = "ruby-sapphire", "Ruby/Sapphire"
+        EMERALD = "emerald", "Emerald"
+        FIRERED_LEAFGREEN = "firered-leafgreen", "FireRed/LeafGreen"
+        DIAMOND_PEARL = "diamond-pearl", "Diamond/Pearl"
+        PLATINUM = "platinum", "Platinum"
+        HEARTGOLD_SOULSILVER = "heartgold-soulsilver", "HeartGold/SoulSilver"
+        BLACK_WHITE = "black-white", "Black/White"
+        BLACK_2_WHITE_2 = "black-2-white-2", "Black 2/White 2"
 
     pokemon = models.ForeignKey(
         Pokemon,

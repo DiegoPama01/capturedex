@@ -1,6 +1,7 @@
 import type {
   CaptureCalculationInput,
   CaptureCalculationResponse,
+  Generation,
   PokemonListResponse,
   VersionGroup,
 } from "@/features/capture-calculator/types/capture";
@@ -20,7 +21,7 @@ function getApiUrl() {
 
 type GetPokemonParams = {
   search?: string;
-  generation?: 1 | 2;
+  generation?: Generation;
   versionGroup?: VersionGroup;
   page?: number;
 };

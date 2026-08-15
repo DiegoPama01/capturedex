@@ -18,6 +18,12 @@ class GenerationTwoBallEffect:
     automatic_capture: bool = False
 
 
+@dataclass(frozen=True)
+class GenerationThreeBallEffect:
+    modified_catch_rate: int
+    automatic_capture: bool = False
+
+
 BallEffectT = TypeVar("BallEffectT", covariant=True)
 
 

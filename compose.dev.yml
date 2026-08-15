@@ -9,6 +9,9 @@ services:
       POSTGRES_USER: capturedex
       POSTGRES_PASSWORD: capturedex
 
+    ports:
+      - "5432:5432"
+
     volumes:
       - capturedex_dev_db:/var/lib/postgresql/data
 

@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -13,13 +19,16 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import type {
   BallType,
   CaptureCalculationInput,
+  Generation,
   Pokemon,
   StatusCondition,
   VersionGroup,
@@ -32,7 +41,7 @@ import {
 
 type EncounterFormProps = {
   pokemon: Pokemon[];
-  generation: 1 | 2;
+  generation: Generation;
   versionGroup: VersionGroup;
   attempts: number;
   isSubmitting: boolean;
@@ -47,11 +56,35 @@ type EncounterFormProps = {
   onSubmit: (input: CaptureCalculationInput) => Promise<void> | void;
 };
 
-const versionGroupOptions: Array<{ value: VersionGroup; label: string }> = [
-  { value: "red-blue", label: "Red / Blue" },
-  { value: "gold-silver", label: "Gold / Silver" },
-  { value: "crystal", label: "Crystal" },
-] as const;
+const versionGroupOptions: Array<{
+  value: VersionGroup;
+  label: string;
+  generation: Generation;
+}> = [
+  { value: "red-blue", label: "Red / Blue", generation: 1 },
+  { value: "gold-silver", label: "Gold / Silver", generation: 2 },
+  { value: "crystal", label: "Crystal", generation: 2 },
+  { value: "ruby-sapphire", label: "Ruby / Sapphire", generation: 3 },
+  { value: "emerald", label: "Emerald", generation: 3 },
+  {
+    value: "firered-leafgreen",
+    label: "FireRed / LeafGreen",
+    generation: 3,
+  },
+  { value: "diamond-pearl", label: "Diamond / Pearl", generation: 4 },
+  { value: "platinum", label: "Platinum", generation: 4 },
+  {
+    value: "heartgold-soulsilver",
+    label: "HeartGold / SoulSilver",
+    generation: 4,
+  },
+  { value: "black-white", label: "Black / White", generation: 5 },
+  {
+    value: "black-2-white-2",
+    label: "Black 2 / White 2",
+    generation: 5,
+  },
+];
 
 const statusOptions: Array<{
   value: StatusCondition;
@@ -65,82 +98,77 @@ const statusOptions: Array<{
   { value: "freeze", label: "Congelado" },
 ];
 
-const ballOptions: PokeballOption[] = [
-  {
-    value: "poke_ball",
-    label: "Poke Ball",
-    sprite: "/pokeballs/Poké_Ball.png",
-  },
-  {
-    value: "great_ball",
-    label: "Great Ball",
-    sprite: "/pokeballs/Super_Ball.png",
-  },
-  {
-    value: "ultra_ball",
-    label: "Ultra Ball",
-    sprite: "/pokeballs/Ultra_Ball.png",
-  },
-  {
-    value: "master_ball",
-    label: "Master Ball",
-    sprite: "/pokeballs/Master_Ball.png",
-  },
+const baseBallOptions: PokeballOption[] = [
+  { value: "poke_ball", label: "Poke Ball", sprite: "/pokeballs/Poké_Ball.png" },
+  { value: "great_ball", label: "Great Ball", sprite: "/pokeballs/Super_Ball.png" },
+  { value: "ultra_ball", label: "Ultra Ball", sprite: "/pokeballs/Ultra_Ball.png" },
+  { value: "master_ball", label: "Master Ball", sprite: "/pokeballs/Master_Ball.png" },
 ];
 
 const generationTwoOnlyBallOptions: PokeballOption[] = [
-  {
-    value: "friend_ball",
-    label: "Amigo Ball",
-    sprite: "/pokeballs/Amigo_Ball.png",
-  },
-  {
-    value: "moon_ball",
-    label: "Luna Ball",
-    sprite: "/pokeballs/Luna_Ball.png",
-  },
-  {
-    value: "fast_ball",
-    label: "Rapid Ball",
-    sprite: "/pokeballs/Rapid_Ball.png",
-  },
-  {
-    value: "love_ball",
-    label: "Amor Ball",
-    sprite: "/pokeballs/Amor_Ball.png",
-  },
-  {
-    value: "level_ball",
-    label: "Nivel Ball",
-    sprite: "/pokeballs/Nivel_Ball.png",
-  },
-  {
-    value: "lure_ball",
-    label: "Cebo Ball",
-    sprite: "/pokeballs/Cebo_Ball.png",
-  },
-  {
-    value: "sport_ball",
-    label: "Competi Ball",
-    sprite: "/pokeballs/Competi_Ball.png",
-  },
-  {
-    value: "heavy_ball",
-    label: "Peso Ball",
-    sprite: "/pokeballs/Peso_Ball.png",
-  },
+  { value: "friend_ball", label: "Amigo Ball", sprite: "/pokeballs/Amigo_Ball.png" },
+  { value: "moon_ball", label: "Luna Ball", sprite: "/pokeballs/Luna_Ball.png" },
+  { value: "fast_ball", label: "Rapid Ball", sprite: "/pokeballs/Rapid_Ball.png" },
+  { value: "love_ball", label: "Amor Ball", sprite: "/pokeballs/Amor_Ball.png" },
+  { value: "level_ball", label: "Nivel Ball", sprite: "/pokeballs/Nivel_Ball.png" },
+  { value: "lure_ball", label: "Cebo Ball", sprite: "/pokeballs/Cebo_Ball.png" },
+  { value: "sport_ball", label: "Competi Ball", sprite: "/pokeballs/Competi_Ball.png" },
+  { value: "heavy_ball", label: "Peso Ball", sprite: "/pokeballs/Peso_Ball.png" },
 ];
 
-const ballOptionsByGeneration: Record<1 | 2, PokeballOption[]> = {
-  1: ballOptions,
-  2: [...ballOptions, ...generationTwoOnlyBallOptions],
+const generationThreePlusBallOptions: PokeballOption[] = [
+  { value: "premier_ball", label: "Honor Ball", sprite: "/pokeballs/Honor_Ball.png" },
+  { value: "nest_ball", label: "Nido Ball", sprite: "/pokeballs/Nido_Ball.png" },
+  { value: "repeat_ball", label: "Acopio Ball", sprite: "/pokeballs/Acopio_Ball.png" },
+  { value: "timer_ball", label: "Turno Ball", sprite: "/pokeballs/Turno_Ball.png" },
+  { value: "luxury_ball", label: "Lujo Ball", sprite: "/pokeballs/Lujo_Ball.png" },
+  { value: "dive_ball", label: "Buceo Ball", sprite: "/pokeballs/Buceo_Ball.png" },
+  { value: "net_ball", label: "Malla Ball", sprite: "/pokeballs/Malla_Ball.png" },
+];
+
+const generationFourOnlyBallOptions: PokeballOption[] = [
+  { value: "dusk_ball", label: "Ocaso Ball", sprite: "/pokeballs/Ocaso_Ball.png" },
+  { value: "heal_ball", label: "Sana Ball", sprite: "/pokeballs/Sana_Ball.png" },
+  { value: "quick_ball", label: "Veloz Ball", sprite: "/pokeballs/Veloz_Ball.png" },
+  { value: "cherish_ball", label: "Gloria Ball", sprite: "/pokeballs/Gloria_Ball.png" },
+  { value: "park_ball", label: "Parque Ball", sprite: "/pokeballs/Parque_Ball.png" },
+];
+
+const generationFiveOnlyBallOptions: PokeballOption[] = [
+  { value: "dream_ball", label: "Ensueno Ball", sprite: "/pokeballs/Ensueño_Ball.png" },
+];
+
+const ballOptionsByGeneration: Record<Generation, PokeballOption[]> = {
+  1: baseBallOptions,
+  2: [...baseBallOptions, ...generationTwoOnlyBallOptions],
+  3: [...baseBallOptions, ...generationThreePlusBallOptions],
+  4: [
+    ...baseBallOptions,
+    ...generationTwoOnlyBallOptions,
+    ...generationThreePlusBallOptions,
+    ...generationFourOnlyBallOptions,
+  ],
+  5: [
+    ...baseBallOptions,
+    ...generationTwoOnlyBallOptions,
+    ...generationThreePlusBallOptions,
+    ...generationFourOnlyBallOptions,
+    ...generationFiveOnlyBallOptions,
+  ],
 };
 
-const generationTwoContextBallSet = new Set<BallType>([
-  "love_ball",
-  "level_ball",
-  "lure_ball",
-]);
+const ballContextFieldsByBall: Partial<Record<BallType, string[]>> = {
+  love_ball: ["is_same_species", "is_opposite_gender"],
+  level_ball: ["player_pokemon_level", "wild_pokemon_level"],
+  lure_ball: ["is_fishing_encounter"],
+  net_ball: [],
+  dive_ball: ["is_fishing_encounter", "is_surfing_encounter", "is_underwater_encounter"],
+  nest_ball: ["wild_pokemon_level"],
+  repeat_ball: ["has_caught_species_before"],
+  timer_ball: ["turns_elapsed"],
+  dusk_ball: ["is_dark_location"],
+  quick_ball: ["turns_elapsed"],
+};
 
 function getOptionLabel<T extends string>(
   options: Array<{ value: T; label: string }>,
@@ -148,6 +176,25 @@ function getOptionLabel<T extends string>(
 ) {
   return options.find((option) => option.value === value)?.label ?? value;
 }
+
+const versionGroupsByGeneration = versionGroupOptions.reduce<
+  Record<Generation, Array<{ value: VersionGroup; label: string }>>
+>(
+  (groups, option) => {
+    groups[option.generation].push({
+      value: option.value,
+      label: option.label,
+    });
+    return groups;
+  },
+  {
+    1: [],
+    2: [],
+    3: [],
+    4: [],
+    5: [],
+  },
+);
 
 export function EncounterForm({
   pokemon,
@@ -165,20 +212,18 @@ export function EncounterForm({
   onLoadMorePokemon,
   onSubmit,
 }: EncounterFormProps) {
-  const [selectedPokemonSnapshot, setSelectedPokemonSnapshot] = useState<Pokemon | undefined>();
+  const [selectedPokemonSnapshot, setSelectedPokemonSnapshot] = useState<
+    Pokemon | undefined
+  >();
   const [pokemonId, setPokemonId] = useState<number | undefined>(
     initialValues?.pokemon_id,
   );
   const [maxHp, setMaxHp] = useState(initialValues?.max_hp ?? 100);
-  const [currentHp, setCurrentHp] = useState(
-    initialValues?.current_hp ?? 100,
-  );
+  const [currentHp, setCurrentHp] = useState(initialValues?.current_hp ?? 100);
   const [status, setStatus] = useState<StatusCondition>(
     initialValues?.status ?? "none",
   );
-  const [ball, setBall] = useState<BallType>(
-    initialValues?.ball ?? "poke_ball",
-  );
+  const [ball, setBall] = useState<BallType>(initialValues?.ball ?? "poke_ball");
   const [playerPokemonLevel, setPlayerPokemonLevel] = useState(
     initialValues?.player_pokemon_level ?? 50,
   );
@@ -188,22 +233,36 @@ export function EncounterForm({
   const [isFishingEncounter, setIsFishingEncounter] = useState(
     initialValues?.is_fishing_encounter ?? false,
   );
+  const [isSurfingEncounter, setIsSurfingEncounter] = useState(
+    initialValues?.is_surfing_encounter ?? false,
+  );
+  const [isUnderwaterEncounter, setIsUnderwaterEncounter] = useState(
+    initialValues?.is_underwater_encounter ?? false,
+  );
+  const [isDarkLocation, setIsDarkLocation] = useState(
+    initialValues?.is_dark_location ?? false,
+  );
+  const [hasCaughtSpeciesBefore, setHasCaughtSpeciesBefore] = useState(
+    initialValues?.has_caught_species_before ?? false,
+  );
   const [isSameSpecies, setIsSameSpecies] = useState(
     initialValues?.is_same_species ?? false,
   );
   const [isOppositeGender, setIsOppositeGender] = useState(
     initialValues?.is_opposite_gender ?? false,
   );
+  const [turnsElapsed, setTurnsElapsed] = useState(
+    initialValues?.turns_elapsed ?? 1,
+  );
 
   const availableBallOptions = ballOptionsByGeneration[generation];
-
   const selectedPokemon = pokemon.find((item) => item.id === pokemonId);
   const activePokemon = selectedPokemon ?? selectedPokemonSnapshot;
   const selectedBall = availableBallOptions.some((option) => option.value === ball)
     ? ball
     : (availableBallOptions[0]?.value ?? "poke_ball");
-  const shouldShowBallContext =
-    generation === 2 && generationTwoContextBallSet.has(selectedBall);
+  const shouldShowBallContext = selectedBall in ballContextFieldsByBall;
+  const activeBallContextFields = ballContextFieldsByBall[selectedBall] ?? [];
 
   function parsePositiveInt(value: string, fallback: number) {
     const nextValue = Number.parseInt(value, 10);
@@ -215,32 +274,65 @@ export function EncounterForm({
     return nextValue;
   }
 
-  const getBallContextInput = useCallback((ballType: BallType) => {
-    switch (ballType) {
-      case "love_ball":
-        return {
-          is_same_species: isSameSpecies,
-          is_opposite_gender: isOppositeGender,
-        };
-      case "level_ball":
-        return {
-          player_pokemon_level: playerPokemonLevel,
-          wild_pokemon_level: wildPokemonLevel,
-        };
-      case "lure_ball":
-        return {
-          is_fishing_encounter: isFishingEncounter,
-        };
-      default:
-        return {};
-    }
-  }, [
-    isFishingEncounter,
-    isOppositeGender,
-    isSameSpecies,
-    playerPokemonLevel,
-    wildPokemonLevel,
-  ]);
+  const getBallContextInput = useCallback(
+    (ballType: BallType) => {
+      switch (ballType) {
+        case "love_ball":
+          return {
+            is_same_species: isSameSpecies,
+            is_opposite_gender: isOppositeGender,
+          };
+        case "level_ball":
+          return {
+            player_pokemon_level: playerPokemonLevel,
+            wild_pokemon_level: wildPokemonLevel,
+          };
+        case "lure_ball":
+          return {
+            is_fishing_encounter: isFishingEncounter,
+          };
+        case "net_ball":
+          return {};
+        case "dive_ball":
+          return {
+            is_fishing_encounter: isFishingEncounter,
+            is_surfing_encounter: isSurfingEncounter,
+            is_underwater_encounter: isUnderwaterEncounter,
+          };
+        case "nest_ball":
+          return {
+            wild_pokemon_level: wildPokemonLevel,
+          };
+        case "repeat_ball":
+          return {
+            has_caught_species_before: hasCaughtSpeciesBefore,
+          };
+        case "timer_ball":
+        case "quick_ball":
+          return {
+            turns_elapsed: turnsElapsed,
+          };
+        case "dusk_ball":
+          return {
+            is_dark_location: isDarkLocation,
+          };
+        default:
+          return {};
+      }
+    },
+    [
+      hasCaughtSpeciesBefore,
+      isDarkLocation,
+      isFishingEncounter,
+      isOppositeGender,
+      isSameSpecies,
+      isSurfingEncounter,
+      isUnderwaterEncounter,
+      playerPokemonLevel,
+      turnsElapsed,
+      wildPokemonLevel,
+    ],
+  );
 
   const formError = useMemo(() => {
     if (!selectedPokemon) {
@@ -276,11 +368,11 @@ export function EncounterForm({
     currentHp,
     formError,
     generation,
+    getBallContextInput,
     maxHp,
     selectedBall,
     status,
     versionGroup,
-    getBallContextInput,
   ]);
 
   useEffect(() => {
@@ -308,12 +400,12 @@ export function EncounterForm({
 
       <CardContent>
         <div className="space-y-4">
-          <Field label="Versión" htmlFor="version-group">
+          <Field label="Version" htmlFor="version-group">
             <Select
               value={versionGroup}
               onValueChange={(value) => {
                 const nextVersionGroup = value as VersionGroup;
-                const nextGeneration = nextVersionGroup === "red-blue" ? 1 : 2;
+                const nextGeneration = getGenerationFromVersionGroup(nextVersionGroup);
 
                 if (
                   activePokemon &&
@@ -333,10 +425,17 @@ export function EncounterForm({
                 </SelectValue>
               </SelectTrigger>
               <SelectContent align="start">
-                {versionGroupOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
+                {(Object.entries(versionGroupsByGeneration) as Array<
+                  [string, Array<{ value: VersionGroup; label: string }>]
+                >).map(([groupGeneration, options]) => (
+                  <SelectGroup key={groupGeneration}>
+                    <SelectLabel>Generacion {groupGeneration}</SelectLabel>
+                    {options.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 ))}
               </SelectContent>
             </Select>
@@ -370,13 +469,7 @@ export function EncounterForm({
             </Field>
           </div>
 
-          {activePokemon && (
-            <p className="text-sm text-muted-foreground">
-              Tasa de captura: {activePokemon.generation_data[0]?.catch_rate ?? "-"} · Versión: {versionGroupOptions.find((option) => option.value === versionGroup)?.label}
-            </p>
-          )}
-
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             <Field label="HP maximos" htmlFor="max-hp">
               <Input
                 id="max-hp"
@@ -404,18 +497,11 @@ export function EncounterForm({
                 }}
               />
             </Field>
-          </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Estado" htmlFor="status">
-              <Select
-                value={status}
-                onValueChange={(value) => setStatus(value as StatusCondition)}
-              >
+              <Select value={status} onValueChange={(value) => setStatus(value as StatusCondition)}>
                 <SelectTrigger id="status" className="h-10 w-full px-3 text-sm">
-                  <SelectValue>
-                    {getOptionLabel(statusOptions, status)}
-                  </SelectValue>
+                  <SelectValue>{getOptionLabel(statusOptions, status)}</SelectValue>
                 </SelectTrigger>
                 <SelectContent align="start">
                   {statusOptions.map((option) => (
@@ -429,85 +515,167 @@ export function EncounterForm({
           </div>
 
           {shouldShowBallContext && (
-            <div className="grid gap-4 rounded-xl border border-border/60 bg-muted/20 p-4 sm:grid-cols-2">
-              {selectedBall === "love_ball" && (
-                <>
-                  <CheckboxField
-                    label="Misma especie"
-                    checked={isSameSpecies}
-                    onCheckedChange={setIsSameSpecies}
-                  />
-                  <CheckboxField
-                    label="Genero opuesto"
-                    checked={isOppositeGender}
-                    onCheckedChange={setIsOppositeGender}
-                  />
-                </>
-              )}
+            <Accordion
+              type="single"
+              collapsible
+              value="ball-context"
+              className="w-full"
+            >
+              <AccordionItem value="ball-context" className="border-b-0">
+                <AccordionTrigger className="px-0 py-1 text-sm font-medium hover:no-underline">
+                  Condiciones de {availableBallOptions.find((option) => option.value === selectedBall)?.label}
+                </AccordionTrigger>
+                <AccordionContent className="pt-3">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                  {selectedBall === "love_ball" && (
+                    <>
+                      <CheckboxField
+                        label="Misma especie"
+                        checked={isSameSpecies}
+                        onCheckedChange={setIsSameSpecies}
+                      />
+                      <CheckboxField
+                        label="Genero opuesto"
+                        checked={isOppositeGender}
+                        onCheckedChange={setIsOppositeGender}
+                      />
+                    </>
+                  )}
 
-              {selectedBall === "level_ball" && (
-                <>
-                  <Field label="Nivel de tu Pokemon" htmlFor="player-pokemon-level">
-                    <Input
-                      id="player-pokemon-level"
-                      type="number"
-                      min={1}
-                      max={100}
-                      value={playerPokemonLevel}
-                      onChange={(event) => {
-                        setPlayerPokemonLevel(
-                          parsePositiveInt(event.target.value, 1),
-                        );
-                      }}
-                    />
-                  </Field>
-                  <Field label="Nivel del salvaje" htmlFor="wild-pokemon-level">
-                    <Input
-                      id="wild-pokemon-level"
-                      type="number"
-                      min={1}
-                      max={100}
-                      value={wildPokemonLevel}
-                      onChange={(event) => {
-                        setWildPokemonLevel(
-                          parsePositiveInt(event.target.value, 1),
-                        );
-                      }}
-                    />
-                  </Field>
-                </>
-              )}
+                  {selectedBall === "level_ball" && (
+                    <>
+                      <Field label="Nivel de tu Pokemon" htmlFor="player-pokemon-level">
+                        <Input
+                          id="player-pokemon-level"
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={playerPokemonLevel}
+                          onChange={(event) => {
+                            setPlayerPokemonLevel(parsePositiveInt(event.target.value, 1));
+                          }}
+                        />
+                      </Field>
+                      <Field label="Nivel del salvaje" htmlFor="wild-pokemon-level">
+                        <Input
+                          id="wild-pokemon-level"
+                          type="number"
+                          min={1}
+                          max={100}
+                          value={wildPokemonLevel}
+                          onChange={(event) => {
+                            setWildPokemonLevel(parsePositiveInt(event.target.value, 1));
+                          }}
+                        />
+                      </Field>
+                    </>
+                  )}
 
-              {selectedBall === "lure_ball" && (
-                <CheckboxField
-                  label="Encuentro por pesca"
-                  checked={isFishingEncounter}
-                  onCheckedChange={setIsFishingEncounter}
-                />
-              )}
-            </div>
+                  {selectedBall === "lure_ball" && (
+                    <CheckboxField
+                      label="Encuentro por pesca"
+                      checked={isFishingEncounter}
+                      onCheckedChange={setIsFishingEncounter}
+                    />
+                  )}
+
+                  {selectedBall === "dive_ball" && (
+                    <>
+                      <CheckboxField
+                        label="Encuentro por pesca"
+                        checked={isFishingEncounter}
+                        onCheckedChange={setIsFishingEncounter}
+                      />
+                      <CheckboxField
+                        label="Encuentro surfeando"
+                        checked={isSurfingEncounter}
+                        onCheckedChange={setIsSurfingEncounter}
+                      />
+                      <CheckboxField
+                        label="Encuentro bajo el agua"
+                        checked={isUnderwaterEncounter}
+                        onCheckedChange={setIsUnderwaterEncounter}
+                      />
+                    </>
+                  )}
+
+                  {selectedBall === "nest_ball" && (
+                    <Field label="Nivel del salvaje" htmlFor="wild-pokemon-level-nest">
+                      <Input
+                        id="wild-pokemon-level-nest"
+                        type="number"
+                        min={1}
+                        max={100}
+                        value={wildPokemonLevel}
+                        onChange={(event) => {
+                          setWildPokemonLevel(parsePositiveInt(event.target.value, 1));
+                        }}
+                      />
+                    </Field>
+                  )}
+
+                  {selectedBall === "repeat_ball" && (
+                    <CheckboxField
+                      label="Ya capturaste esta especie"
+                      checked={hasCaughtSpeciesBefore}
+                      onCheckedChange={setHasCaughtSpeciesBefore}
+                    />
+                  )}
+
+                  {(selectedBall === "timer_ball" || selectedBall === "quick_ball") && (
+                    <Field label="Turnos transcurridos" htmlFor="turns-elapsed">
+                      <Input
+                        id="turns-elapsed"
+                        type="number"
+                        min={1}
+                        max={100}
+                        value={turnsElapsed}
+                        onChange={(event) => {
+                          setTurnsElapsed(parsePositiveInt(event.target.value, 1));
+                        }}
+                      />
+                    </Field>
+                  )}
+
+                  {selectedBall === "dusk_ball" && (
+                    <CheckboxField
+                      label="Cueva o zona oscura"
+                      checked={isDarkLocation}
+                      onCheckedChange={setIsDarkLocation}
+                    />
+                  )}
+                </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           )}
 
           {(formError || error) && (
             <p className="text-sm text-destructive">{formError ?? error}</p>
           )}
 
-          {activePokemon && !formError && (
-            <p className="text-xs text-muted-foreground">
-              {isSubmitting ? "Recalculando..." : "Se recalcula automaticamente al cambiar los valores."}
-            </p>
-          )}
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function isPokemonAvailableInGeneration(pokemon: Pokemon, generation: 1 | 2): boolean {
-  const maxDexByGeneration = {
+function getGenerationFromVersionGroup(versionGroup: VersionGroup): Generation {
+  const option = versionGroupOptions.find((item) => item.value === versionGroup);
+  return option?.generation ?? 1;
+}
+
+function isPokemonAvailableInGeneration(
+  pokemon: Pokemon,
+  generation: Generation,
+): boolean {
+  const maxDexByGeneration: Record<Generation, number> = {
     1: 151,
     2: 251,
-  } as const;
+    3: 386,
+    4: 493,
+    5: 649,
+  };
 
   return pokemon.national_dex_number <= maxDexByGeneration[generation];
 }

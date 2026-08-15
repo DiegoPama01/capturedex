@@ -66,6 +66,8 @@ class BaseImportGenerationCommand(BaseCommand):
                 "name": self.get_spanish_name(species_data),
                 "slug": species_data["name"],
                 "weight_kg": self.get_weight_kg(pokemon_data),
+                "base_speed": self.get_base_speed(pokemon_data),
+                "types": self.get_types(pokemon_data),
                 "evolves_with_moon_stone": self.evolves_with_moon_stone(
                     species_data,
                     evolution_chain_data,
@@ -78,6 +80,25 @@ class BaseImportGenerationCommand(BaseCommand):
     @staticmethod
     def get_weight_kg(pokemon_data: dict) -> float:
         return pokemon_data.get("weight", 0) / 10
+
+    @staticmethod
+    def get_base_speed(pokemon_data: dict) -> int:
+        for stat_entry in pokemon_data.get("stats", []):
+            if stat_entry.get("stat", {}).get("name") == "speed":
+                return stat_entry.get("base_stat", 0)
+
+        return 0
+
+    @staticmethod
+    def get_types(pokemon_data: dict) -> list[str]:
+        return [
+            pokemon_type.get("type", {}).get("name")
+            for pokemon_type in sorted(
+                pokemon_data.get("types", []),
+                key=lambda pokemon_type: pokemon_type.get("slot", 0),
+            )
+            if pokemon_type.get("type", {}).get("name")
+        ]
 
     @staticmethod
     def evolves_with_moon_stone(

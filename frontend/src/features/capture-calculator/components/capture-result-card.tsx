@@ -153,6 +153,10 @@ function SingleProbabilitySection({ probability }: { probability: number }) {
 }
 
 function getVersionGroupLabel(versionGroup: VersionGroup): string {
+  if (versionGroup === "red-blue") {
+    return "Red / Blue";
+  }
+
   if (versionGroup === "gold-silver") {
     return "Gold / Silver";
   }
@@ -161,7 +165,35 @@ function getVersionGroupLabel(versionGroup: VersionGroup): string {
     return "Crystal";
   }
 
-  return "Red / Blue";
+  if (versionGroup === "ruby-sapphire") {
+    return "Ruby / Sapphire";
+  }
+
+  if (versionGroup === "emerald") {
+    return "Emerald";
+  }
+
+  if (versionGroup === "firered-leafgreen") {
+    return "FireRed / LeafGreen";
+  }
+
+  if (versionGroup === "diamond-pearl") {
+    return "Diamond / Pearl";
+  }
+
+  if (versionGroup === "platinum") {
+    return "Platinum";
+  }
+
+  if (versionGroup === "heartgold-soulsilver") {
+    return "HeartGold / SoulSilver";
+  }
+
+  if (versionGroup === "black-white") {
+    return "Black / White";
+  }
+
+  return "Black 2 / White 2";
 }
 
 function CumulativeProbabilitySection({

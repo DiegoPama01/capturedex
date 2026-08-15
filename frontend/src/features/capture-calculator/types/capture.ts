@@ -5,7 +5,20 @@ export type GenerationData = {
   sprite_url: string;
 };
 
-export type VersionGroup = "red-blue" | "gold-silver" | "crystal";
+export type Generation = 1 | 2 | 3 | 4 | 5;
+
+export type VersionGroup =
+  | "red-blue"
+  | "gold-silver"
+  | "crystal"
+  | "ruby-sapphire"
+  | "emerald"
+  | "firered-leafgreen"
+  | "diamond-pearl"
+  | "platinum"
+  | "heartgold-soulsilver"
+  | "black-white"
+  | "black-2-white-2";
 
 export type Pokemon = {
   id: number;
@@ -42,11 +55,24 @@ export type BallType =
   | "level_ball"
   | "lure_ball"
   | "sport_ball"
-  | "heavy_ball";
+  | "heavy_ball"
+  | "premier_ball"
+  | "nest_ball"
+  | "repeat_ball"
+  | "timer_ball"
+  | "luxury_ball"
+  | "dive_ball"
+  | "net_ball"
+  | "dusk_ball"
+  | "heal_ball"
+  | "quick_ball"
+  | "cherish_ball"
+  | "park_ball"
+  | "dream_ball";
 
 export type CaptureCalculationInput = {
   pokemon_id: number;
-  generation: 1 | 2;
+  generation: Generation;
   version_group: VersionGroup;
   max_hp: number;
   current_hp: number;
@@ -56,8 +82,13 @@ export type CaptureCalculationInput = {
   player_pokemon_level?: number | null;
   wild_pokemon_level?: number | null;
   is_fishing_encounter?: boolean;
+  is_surfing_encounter?: boolean;
+  is_underwater_encounter?: boolean;
+  is_dark_location?: boolean;
+  has_caught_species_before?: boolean;
   is_same_species?: boolean;
   is_opposite_gender?: boolean;
+  turns_elapsed?: number;
 };
 
 export type CaptureCalculationResponse = {

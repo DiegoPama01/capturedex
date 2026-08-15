@@ -1,12 +1,10 @@
 from rest_framework import serializers
 
 from capture.domain.enums import BallType, StatusCondition
-
-
-SUPPORTED_VERSION_GROUPS = {
-    1: {"red-blue"},
-    2: {"gold-silver", "crystal"},
-}
+from pokemon.version_groups import (
+    DEFAULT_VERSION_GROUP_BY_GENERATION,
+    SUPPORTED_VERSION_GROUPS,
+)
 
 
 class CaptureCalculationInputSerializer(serializers.Serializer):
@@ -18,7 +16,7 @@ class CaptureCalculationInputSerializer(serializers.Serializer):
     )
 
     version_group = serializers.CharField(
-        default="red-blue",
+        required=False,
     )
 
     max_hp = serializers.IntegerField(
@@ -65,6 +63,26 @@ class CaptureCalculationInputSerializer(serializers.Serializer):
         default=False,
     )
 
+    is_surfing_encounter = serializers.BooleanField(
+        required=False,
+        default=False,
+    )
+
+    is_underwater_encounter = serializers.BooleanField(
+        required=False,
+        default=False,
+    )
+
+    is_dark_location = serializers.BooleanField(
+        required=False,
+        default=False,
+    )
+
+    has_caught_species_before = serializers.BooleanField(
+        required=False,
+        default=False,
+    )
+
     is_same_species = serializers.BooleanField(
         required=False,
         default=False,
@@ -75,8 +93,16 @@ class CaptureCalculationInputSerializer(serializers.Serializer):
         default=False,
     )
 
+    turns_elapsed = serializers.IntegerField(
+        min_value=1,
+        max_value=100,
+        required=False,
+        default=1,
+    )
+
     def validate(self, attrs):
         self._validate_hp(attrs)
+        self._apply_default_version_group(attrs)
         self._validate_version_group(attrs)
 
         return attrs
@@ -87,6 +113,16 @@ class CaptureCalculationInputSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {"current_hp": ("Current HP cannot exceed maximum HP.")}
             )
+
+    @staticmethod
+    def _apply_default_version_group(attrs) -> None:
+        generation = attrs["generation"]
+
+        if (
+            "version_group" not in attrs
+            and generation in DEFAULT_VERSION_GROUP_BY_GENERATION
+        ):
+            attrs["version_group"] = DEFAULT_VERSION_GROUP_BY_GENERATION[generation]
 
     @staticmethod
     def _validate_version_group(attrs) -> None:

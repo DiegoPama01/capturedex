@@ -15,17 +15,25 @@ class CaptureInput:
     player_pokemon_level: int | None = None
     wild_pokemon_level: int | None = None
     wild_pokemon_weight_kg: float | None = None
+    wild_pokemon_base_speed: int | None = None
     is_fishing_encounter: bool = False
+    is_surfing_encounter: bool = False
+    is_underwater_encounter: bool = False
+    is_dark_location: bool = False
+    has_caught_species_before: bool = False
+    is_water_type: bool = False
+    is_bug_type: bool = False
     evolves_with_moon_stone: bool = False
     is_fleeing_species: bool = False
     is_same_species: bool = False
     is_opposite_gender: bool = False
+    turns_elapsed: int = 1
 
-    SUPPORTED_GENERATIONS = (1, 2)
+    SUPPORTED_GENERATIONS = (1, 2, 3, 4, 5, 6)
 
     def __post_init__(self) -> None:
         if self.generation not in self.SUPPORTED_GENERATIONS:
-            raise ValueError("Only Generations I and II are currently supported.")
+            raise ValueError("Only Generations I to VI are currently supported.")
 
         if not 1 <= self.catch_rate <= 255:
             raise ValueError("Catch rate must be between 1 and 255.")
@@ -53,3 +61,14 @@ class CaptureInput:
 
         if self.wild_pokemon_weight_kg is not None and self.wild_pokemon_weight_kg < 0:
             raise ValueError("Wild Pokemon weight must be greater than or equal to 0.")
+
+        if (
+            self.wild_pokemon_base_speed is not None
+            and self.wild_pokemon_base_speed < 0
+        ):
+            raise ValueError(
+                "Wild Pokemon base speed must be greater than or equal to 0."
+            )
+
+        if not 1 <= self.turns_elapsed <= 100:
+            raise ValueError("Turns elapsed must be between 1 and 100.")
