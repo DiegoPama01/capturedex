@@ -193,7 +193,47 @@ function getVersionGroupLabel(versionGroup: VersionGroup): string {
     return "Black / White";
   }
 
-  return "Black 2 / White 2";
+  if (versionGroup === "black-2-white-2") {
+    return "Black 2 / White 2";
+  }
+
+  if (versionGroup === "x-y") {
+    return "X / Y";
+  }
+
+  if (versionGroup === "omega-ruby-alpha-sapphire") {
+    return "Omega Ruby / Alpha Sapphire";
+  }
+
+  if (versionGroup === "sun-moon") {
+    return "Sun / Moon";
+  }
+
+  if (versionGroup === "ultra-sun-ultra-moon") {
+    return "Ultra Sun / Ultra Moon";
+  }
+
+  if (versionGroup === "lets-go-pikachu-lets-go-eevee") {
+    return "Let's Go Pikachu / Let's Go Eevee";
+  }
+
+  if (versionGroup === "sword-shield") {
+    return "Sword / Shield";
+  }
+
+  if (versionGroup === "brilliant-diamond-shining-pearl") {
+    return "Brilliant Diamond / Shining Pearl";
+  }
+
+  if (versionGroup === "legends-arceus") {
+    return "Legends: Arceus";
+  }
+
+  if (versionGroup === "scarlet-violet") {
+    return "Scarlet / Violet";
+  }
+
+  return versionGroup;
 }
 
 function CumulativeProbabilitySection({

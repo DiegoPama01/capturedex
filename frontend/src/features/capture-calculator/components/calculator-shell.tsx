@@ -191,5 +191,29 @@ function getGenerationFromVersionGroup(versionGroup: VersionGroup): Generation {
     return 4;
   }
 
-  return 5;
+  if (versionGroup === "black-white" || versionGroup === "black-2-white-2") {
+    return 5;
+  }
+
+  if (versionGroup === "x-y" || versionGroup === "omega-ruby-alpha-sapphire") {
+    return 6;
+  }
+
+  if (
+    versionGroup === "sun-moon" ||
+    versionGroup === "ultra-sun-ultra-moon" ||
+    versionGroup === "lets-go-pikachu-lets-go-eevee"
+  ) {
+    return 7;
+  }
+
+  if (
+    versionGroup === "sword-shield" ||
+    versionGroup === "brilliant-diamond-shining-pearl" ||
+    versionGroup === "legends-arceus"
+  ) {
+    return 8;
+  }
+
+  return 9;
 }

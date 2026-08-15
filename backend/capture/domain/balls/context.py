@@ -19,6 +19,7 @@ class BallContext:
     has_caught_species_before: bool = False
     is_water_type: bool = False
     is_bug_type: bool = False
+    is_ultra_beast: bool = False
     evolves_with_moon_stone: bool = False
     is_fleeing_species: bool = False
     is_same_species: bool = False

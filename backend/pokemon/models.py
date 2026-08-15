@@ -20,6 +20,7 @@ class Pokemon(models.Model):
     )
     base_speed = models.PositiveSmallIntegerField(default=0)
     types = models.JSONField(default=list, blank=True)
+    is_ultra_beast = models.BooleanField(default=False)
     evolves_with_moon_stone = models.BooleanField(default=False)
     is_fleeing_species = models.BooleanField(default=False)
 
@@ -45,6 +46,24 @@ class PokemonGenerationData(models.Model):
         HEARTGOLD_SOULSILVER = "heartgold-soulsilver", "HeartGold/SoulSilver"
         BLACK_WHITE = "black-white", "Black/White"
         BLACK_2_WHITE_2 = "black-2-white-2", "Black 2/White 2"
+        X_Y = "x-y", "X/Y"
+        OMEGA_RUBY_ALPHA_SAPPHIRE = (
+            "omega-ruby-alpha-sapphire",
+            "Omega Ruby/Alpha Sapphire",
+        )
+        SUN_MOON = "sun-moon", "Sun/Moon"
+        ULTRA_SUN_ULTRA_MOON = "ultra-sun-ultra-moon", "Ultra Sun/Ultra Moon"
+        LETS_GO_PIKACHU_LETS_GO_EEVEE = (
+            "lets-go-pikachu-lets-go-eevee",
+            "Let's Go Pikachu/Let's Go Eevee",
+        )
+        SWORD_SHIELD = "sword-shield", "Sword/Shield"
+        BRILLIANT_DIAMOND_SHINING_PEARL = (
+            "brilliant-diamond-shining-pearl",
+            "Brilliant Diamond/Shining Pearl",
+        )
+        LEGENDS_ARCEUS = "legends-arceus", "Legends: Arceus"
+        SCARLET_VIOLET = "scarlet-violet", "Scarlet/Violet"
 
     pokemon = models.ForeignKey(
         Pokemon,
@@ -58,7 +77,7 @@ class PokemonGenerationData(models.Model):
         ],
     )
     version_group = models.CharField(
-        max_length=30,
+        max_length=40,
         choices=VersionGroup.choices,
     )
     catch_rate = models.PositiveSmallIntegerField(

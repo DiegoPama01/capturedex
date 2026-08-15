@@ -10,6 +10,9 @@ from capture.domain.balls.generation_3 import GenerationThreeBallRules
 from capture.domain.balls.generation_4 import GenerationFourBallRules
 from capture.domain.balls.generation_5 import GenerationFiveBallRules
 from capture.domain.balls.generation_6 import GenerationSixBallRules
+from capture.domain.balls.generation_7 import GenerationSevenBallRules
+from capture.domain.balls.generation_8 import GenerationEightBallRules
+from capture.domain.balls.generation_9 import GenerationNineBallRules
 
 
 _BALL_RULES: dict[
@@ -28,6 +31,9 @@ _BALL_RULES: dict[
     4: GenerationFourBallRules,
     5: GenerationFiveBallRules,
     6: GenerationSixBallRules,
+    7: GenerationSevenBallRules,
+    8: GenerationEightBallRules,
+    9: GenerationNineBallRules,
 }
 
 

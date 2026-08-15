@@ -13,6 +13,9 @@ from capture.domain.calculators.generation_3 import (
 from capture.domain.calculators.generation_4 import GenerationFourCalculator
 from capture.domain.calculators.generation_5 import GenerationFiveCalculator
 from capture.domain.calculators.generation_6 import GenerationSixCalculator
+from capture.domain.calculators.generation_7 import GenerationSevenCalculator
+from capture.domain.calculators.generation_8 import GenerationEightCalculator
+from capture.domain.calculators.generation_9 import GenerationNineCalculator
 
 
 _CALCULATORS: dict[int, type[BaseCaptureCalculator]] = {
@@ -22,6 +25,9 @@ _CALCULATORS: dict[int, type[BaseCaptureCalculator]] = {
     4: GenerationFourCalculator,
     5: GenerationFiveCalculator,
     6: GenerationSixCalculator,
+    7: GenerationSevenCalculator,
+    8: GenerationEightCalculator,
+    9: GenerationNineCalculator,
 }
 
 

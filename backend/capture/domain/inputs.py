@@ -23,17 +23,18 @@ class CaptureInput:
     has_caught_species_before: bool = False
     is_water_type: bool = False
     is_bug_type: bool = False
+    is_ultra_beast: bool = False
     evolves_with_moon_stone: bool = False
     is_fleeing_species: bool = False
     is_same_species: bool = False
     is_opposite_gender: bool = False
     turns_elapsed: int = 1
 
-    SUPPORTED_GENERATIONS = (1, 2, 3, 4, 5, 6)
+    SUPPORTED_GENERATIONS = (1, 2, 3, 4, 5, 6, 7, 8, 9)
 
     def __post_init__(self) -> None:
         if self.generation not in self.SUPPORTED_GENERATIONS:
-            raise ValueError("Only Generations I to VI are currently supported.")
+            raise ValueError("Only Generations I to IX are currently supported.")
 
         if not 1 <= self.catch_rate <= 255:
             raise ValueError("Catch rate must be between 1 and 255.")

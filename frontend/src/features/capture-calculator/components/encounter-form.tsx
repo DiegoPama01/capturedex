@@ -84,6 +84,31 @@ const versionGroupOptions: Array<{
     label: "Black 2 / White 2",
     generation: 5,
   },
+  { value: "x-y", label: "X / Y", generation: 6 },
+  {
+    value: "omega-ruby-alpha-sapphire",
+    label: "Omega Ruby / Alpha Sapphire",
+    generation: 6,
+  },
+  { value: "sun-moon", label: "Sun / Moon", generation: 7 },
+  {
+    value: "ultra-sun-ultra-moon",
+    label: "Ultra Sun / Ultra Moon",
+    generation: 7,
+  },
+  {
+    value: "lets-go-pikachu-lets-go-eevee",
+    label: "Let's Go Pikachu / Let's Go Eevee",
+    generation: 7,
+  },
+  { value: "sword-shield", label: "Sword / Shield", generation: 8 },
+  {
+    value: "brilliant-diamond-shining-pearl",
+    label: "Brilliant Diamond / Shining Pearl",
+    generation: 8,
+  },
+  { value: "legends-arceus", label: "Legends: Arceus", generation: 8 },
+  { value: "scarlet-violet", label: "Scarlet / Violet", generation: 9 },
 ];
 
 const statusOptions: Array<{
@@ -138,6 +163,29 @@ const generationFiveOnlyBallOptions: PokeballOption[] = [
   { value: "dream_ball", label: "Ensueno Ball", sprite: "/pokeballs/Ensueño_Ball.png" },
 ];
 
+const generationSevenOnlyBallOptions: PokeballOption[] = [
+  { value: "beast_ball", label: "Ente Ball", sprite: "/pokeballs/Ente_Ball.png" },
+];
+
+const generationEightOnlyBallOptions: PokeballOption[] = [
+  { value: "beast_ball", label: "Ente Ball", sprite: "/pokeballs/Ente_Ball.png" },
+];
+
+const legendsArceusBallOptions: PokeballOption[] = [
+  { value: "feather_ball", label: "Pluma Ball", sprite: "/pokeballs/Pluma_Ball.png" },
+  { value: "wing_ball", label: "Ala Ball", sprite: "/pokeballs/Ala_Ball.png" },
+  { value: "jet_ball", label: "Aero Ball", sprite: "/pokeballs/Aero_Ball.png" },
+  {
+    value: "hisui_heavy_ball",
+    label: "Peso Ball de Hisui",
+    sprite: "/pokeballs/Peso_Ball_(Hisui).png",
+  },
+  { value: "leaden_ball", label: "Kilo Ball", sprite: "/pokeballs/Kilo_Ball.png" },
+  { value: "gigaton_ball", label: "Quintal Ball", sprite: "/pokeballs/Quintal_Ball.png" },
+  { value: "origin_ball", label: "Origen Ball", sprite: "/pokeballs/Origen_Ball.png" },
+  { value: "strange_ball", label: "Extrana Ball", sprite: "/pokeballs/Extraña_Ball.png" },
+];
+
 const ballOptionsByGeneration: Record<Generation, PokeballOption[]> = {
   1: baseBallOptions,
   2: [...baseBallOptions, ...generationTwoOnlyBallOptions],
@@ -155,6 +203,43 @@ const ballOptionsByGeneration: Record<Generation, PokeballOption[]> = {
     ...generationFourOnlyBallOptions,
     ...generationFiveOnlyBallOptions,
   ],
+  6: [
+    ...baseBallOptions,
+    ...generationTwoOnlyBallOptions,
+    ...generationThreePlusBallOptions,
+    ...generationFourOnlyBallOptions,
+    ...generationFiveOnlyBallOptions,
+  ],
+  7: [
+    ...baseBallOptions,
+    ...generationTwoOnlyBallOptions,
+    ...generationThreePlusBallOptions,
+    ...generationFourOnlyBallOptions,
+    ...generationFiveOnlyBallOptions,
+    ...generationSevenOnlyBallOptions,
+  ],
+  8: [
+    ...baseBallOptions,
+    ...generationTwoOnlyBallOptions,
+    ...generationThreePlusBallOptions,
+    ...generationFourOnlyBallOptions,
+    ...generationFiveOnlyBallOptions,
+    ...generationSevenOnlyBallOptions,
+    ...generationEightOnlyBallOptions,
+  ],
+  9: [
+    ...baseBallOptions,
+    ...generationTwoOnlyBallOptions,
+    ...generationThreePlusBallOptions,
+    ...generationFourOnlyBallOptions,
+    ...generationFiveOnlyBallOptions,
+    ...generationSevenOnlyBallOptions,
+    ...generationEightOnlyBallOptions,
+  ],
+};
+
+const ballOptionsByVersionGroup: Partial<Record<VersionGroup, PokeballOption[]>> = {
+  "legends-arceus": legendsArceusBallOptions,
 };
 
 const ballContextFieldsByBall: Partial<Record<BallType, string[]>> = {
@@ -193,6 +278,10 @@ const versionGroupsByGeneration = versionGroupOptions.reduce<
     3: [],
     4: [],
     5: [],
+    6: [],
+    7: [],
+    8: [],
+    9: [],
   },
 );
 
@@ -255,7 +344,8 @@ export function EncounterForm({
     initialValues?.turns_elapsed ?? 1,
   );
 
-  const availableBallOptions = ballOptionsByGeneration[generation];
+  const availableBallOptions =
+    ballOptionsByVersionGroup[versionGroup] ?? ballOptionsByGeneration[generation];
   const selectedPokemon = pokemon.find((item) => item.id === pokemonId);
   const activePokemon = selectedPokemon ?? selectedPokemonSnapshot;
   const selectedBall = availableBallOptions.some((option) => option.value === ball)
@@ -675,6 +765,10 @@ function isPokemonAvailableInGeneration(
     3: 386,
     4: 493,
     5: 649,
+    6: 721,
+    7: 809,
+    8: 905,
+    9: 1025,
   };
 
   return pokemon.national_dex_number <= maxDexByGeneration[generation];

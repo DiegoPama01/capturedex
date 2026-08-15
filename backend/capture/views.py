@@ -47,6 +47,7 @@ class CaptureCalculationView(APIView):
             has_caught_species_before=data.get("has_caught_species_before", False),
             is_water_type="water" in pokemon_types,
             is_bug_type="bug" in pokemon_types,
+            is_ultra_beast=pokemon_data.pokemon.is_ultra_beast,
             evolves_with_moon_stone=(pokemon_data.pokemon.evolves_with_moon_stone),
             is_fleeing_species=pokemon_data.pokemon.is_fleeing_species,
             is_same_species=data.get("is_same_species", False),

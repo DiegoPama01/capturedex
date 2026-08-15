@@ -68,6 +68,7 @@ class BaseImportGenerationCommand(BaseCommand):
                 "weight_kg": self.get_weight_kg(pokemon_data),
                 "base_speed": self.get_base_speed(pokemon_data),
                 "types": self.get_types(pokemon_data),
+                "is_ultra_beast": self.is_ultra_beast(species_data),
                 "evolves_with_moon_stone": self.evolves_with_moon_stone(
                     species_data,
                     evolution_chain_data,
@@ -99,6 +100,28 @@ class BaseImportGenerationCommand(BaseCommand):
             )
             if pokemon_type.get("type", {}).get("name")
         ]
+
+    @staticmethod
+    def is_ultra_beast(species_data: dict) -> bool:
+        return species_data.get("is_legendary") is False and (
+            species_data.get("generation", {}).get("name") == "generation-vii"
+            and species_data.get("capture_rate") == 45
+            and species_data.get("is_mythical") is False
+            and species_data.get("name")
+            in {
+                "nihilego",
+                "buzzwole",
+                "pheromosa",
+                "xurkitree",
+                "celesteela",
+                "kartana",
+                "guzzlord",
+                "poipole",
+                "naganadel",
+                "stakataka",
+                "blacephalon",
+            }
+        )
 
     @staticmethod
     def evolves_with_moon_stone(

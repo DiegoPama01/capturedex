@@ -5,7 +5,7 @@ export type GenerationData = {
   sprite_url: string;
 };
 
-export type Generation = 1 | 2 | 3 | 4 | 5;
+export type Generation = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export type VersionGroup =
   | "red-blue"
@@ -18,7 +18,16 @@ export type VersionGroup =
   | "platinum"
   | "heartgold-soulsilver"
   | "black-white"
-  | "black-2-white-2";
+  | "black-2-white-2"
+  | "x-y"
+  | "omega-ruby-alpha-sapphire"
+  | "sun-moon"
+  | "ultra-sun-ultra-moon"
+  | "lets-go-pikachu-lets-go-eevee"
+  | "sword-shield"
+  | "brilliant-diamond-shining-pearl"
+  | "legends-arceus"
+  | "scarlet-violet";
 
 export type Pokemon = {
   id: number;
@@ -68,7 +77,16 @@ export type BallType =
   | "quick_ball"
   | "cherish_ball"
   | "park_ball"
-  | "dream_ball";
+  | "dream_ball"
+  | "beast_ball"
+  | "feather_ball"
+  | "wing_ball"
+  | "jet_ball"
+  | "hisui_heavy_ball"
+  | "leaden_ball"
+  | "gigaton_ball"
+  | "origin_ball"
+  | "strange_ball";
 
 export type CaptureCalculationInput = {
   pokemon_id: number;
