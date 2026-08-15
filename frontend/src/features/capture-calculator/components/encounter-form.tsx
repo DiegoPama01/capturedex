@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   Card,
@@ -88,10 +88,59 @@ const ballOptions: PokeballOption[] = [
   },
 ];
 
+const generationTwoOnlyBallOptions: PokeballOption[] = [
+  {
+    value: "friend_ball",
+    label: "Amigo Ball",
+    sprite: "/pokeballs/Amigo_Ball.png",
+  },
+  {
+    value: "moon_ball",
+    label: "Luna Ball",
+    sprite: "/pokeballs/Luna_Ball.png",
+  },
+  {
+    value: "fast_ball",
+    label: "Rapid Ball",
+    sprite: "/pokeballs/Rapid_Ball.png",
+  },
+  {
+    value: "love_ball",
+    label: "Amor Ball",
+    sprite: "/pokeballs/Amor_Ball.png",
+  },
+  {
+    value: "level_ball",
+    label: "Nivel Ball",
+    sprite: "/pokeballs/Nivel_Ball.png",
+  },
+  {
+    value: "lure_ball",
+    label: "Cebo Ball",
+    sprite: "/pokeballs/Cebo_Ball.png",
+  },
+  {
+    value: "sport_ball",
+    label: "Competi Ball",
+    sprite: "/pokeballs/Competi_Ball.png",
+  },
+  {
+    value: "heavy_ball",
+    label: "Peso Ball",
+    sprite: "/pokeballs/Peso_Ball.png",
+  },
+];
+
 const ballOptionsByGeneration: Record<1 | 2, PokeballOption[]> = {
   1: ballOptions,
-  2: ballOptions,
+  2: [...ballOptions, ...generationTwoOnlyBallOptions],
 };
+
+const generationTwoContextBallSet = new Set<BallType>([
+  "love_ball",
+  "level_ball",
+  "lure_ball",
+]);
 
 function getOptionLabel<T extends string>(
   options: Array<{ value: T; label: string }>,
@@ -130,6 +179,21 @@ export function EncounterForm({
   const [ball, setBall] = useState<BallType>(
     initialValues?.ball ?? "poke_ball",
   );
+  const [playerPokemonLevel, setPlayerPokemonLevel] = useState(
+    initialValues?.player_pokemon_level ?? 50,
+  );
+  const [wildPokemonLevel, setWildPokemonLevel] = useState(
+    initialValues?.wild_pokemon_level ?? 30,
+  );
+  const [isFishingEncounter, setIsFishingEncounter] = useState(
+    initialValues?.is_fishing_encounter ?? false,
+  );
+  const [isSameSpecies, setIsSameSpecies] = useState(
+    initialValues?.is_same_species ?? false,
+  );
+  const [isOppositeGender, setIsOppositeGender] = useState(
+    initialValues?.is_opposite_gender ?? false,
+  );
 
   const availableBallOptions = ballOptionsByGeneration[generation];
 
@@ -138,6 +202,8 @@ export function EncounterForm({
   const selectedBall = availableBallOptions.some((option) => option.value === ball)
     ? ball
     : (availableBallOptions[0]?.value ?? "poke_ball");
+  const shouldShowBallContext =
+    generation === 2 && generationTwoContextBallSet.has(selectedBall);
 
   function parsePositiveInt(value: string, fallback: number) {
     const nextValue = Number.parseInt(value, 10);
@@ -148,6 +214,33 @@ export function EncounterForm({
 
     return nextValue;
   }
+
+  const getBallContextInput = useCallback((ballType: BallType) => {
+    switch (ballType) {
+      case "love_ball":
+        return {
+          is_same_species: isSameSpecies,
+          is_opposite_gender: isOppositeGender,
+        };
+      case "level_ball":
+        return {
+          player_pokemon_level: playerPokemonLevel,
+          wild_pokemon_level: wildPokemonLevel,
+        };
+      case "lure_ball":
+        return {
+          is_fishing_encounter: isFishingEncounter,
+        };
+      default:
+        return {};
+    }
+  }, [
+    isFishingEncounter,
+    isOppositeGender,
+    isSameSpecies,
+    playerPokemonLevel,
+    wildPokemonLevel,
+  ]);
 
   const formError = useMemo(() => {
     if (!selectedPokemon) {
@@ -171,12 +264,24 @@ export function EncounterForm({
       generation,
       version_group: versionGroup,
       max_hp: maxHp,
-        current_hp: currentHp,
-        status,
-        ball: selectedBall,
-        attempts,
-      };
-  }, [activePokemon, attempts, currentHp, formError, generation, maxHp, selectedBall, status, versionGroup]);
+      current_hp: currentHp,
+      status,
+      ball: selectedBall,
+      attempts,
+      ...getBallContextInput(selectedBall),
+    };
+  }, [
+    activePokemon,
+    attempts,
+    currentHp,
+    formError,
+    generation,
+    maxHp,
+    selectedBall,
+    status,
+    versionGroup,
+    getBallContextInput,
+  ]);
 
   useEffect(() => {
     if (!input) {
@@ -323,6 +428,66 @@ export function EncounterForm({
             </Field>
           </div>
 
+          {shouldShowBallContext && (
+            <div className="grid gap-4 rounded-xl border border-border/60 bg-muted/20 p-4 sm:grid-cols-2">
+              {selectedBall === "love_ball" && (
+                <>
+                  <CheckboxField
+                    label="Misma especie"
+                    checked={isSameSpecies}
+                    onCheckedChange={setIsSameSpecies}
+                  />
+                  <CheckboxField
+                    label="Genero opuesto"
+                    checked={isOppositeGender}
+                    onCheckedChange={setIsOppositeGender}
+                  />
+                </>
+              )}
+
+              {selectedBall === "level_ball" && (
+                <>
+                  <Field label="Nivel de tu Pokemon" htmlFor="player-pokemon-level">
+                    <Input
+                      id="player-pokemon-level"
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={playerPokemonLevel}
+                      onChange={(event) => {
+                        setPlayerPokemonLevel(
+                          parsePositiveInt(event.target.value, 1),
+                        );
+                      }}
+                    />
+                  </Field>
+                  <Field label="Nivel del salvaje" htmlFor="wild-pokemon-level">
+                    <Input
+                      id="wild-pokemon-level"
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={wildPokemonLevel}
+                      onChange={(event) => {
+                        setWildPokemonLevel(
+                          parsePositiveInt(event.target.value, 1),
+                        );
+                      }}
+                    />
+                  </Field>
+                </>
+              )}
+
+              {selectedBall === "lure_ball" && (
+                <CheckboxField
+                  label="Encuentro por pesca"
+                  checked={isFishingEncounter}
+                  onCheckedChange={setIsFishingEncounter}
+                />
+              )}
+            </div>
+          )}
+
           {(formError || error) && (
             <p className="text-sm text-destructive">{formError ?? error}</p>
           )}
@@ -363,5 +528,29 @@ function Field({
       </label>
       {children}
     </div>
+  );
+}
+
+function CheckboxField({
+  label,
+  checked,
+  onCheckedChange,
+}: {
+  label: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}) {
+  return (
+    <label className="flex min-h-10 items-center gap-3 rounded-lg border border-border/60 bg-background px-3 py-2 text-sm">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => {
+          onCheckedChange(event.target.checked);
+        }}
+        className="size-4"
+      />
+      <span>{label}</span>
+    </label>
   );
 }

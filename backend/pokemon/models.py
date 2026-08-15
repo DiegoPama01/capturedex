@@ -12,6 +12,14 @@ class Pokemon(models.Model):
     )
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True)
+    weight_kg = models.DecimalField(
+        max_digits=6,
+        decimal_places=1,
+        default=0,
+        validators=[MinValueValidator(0)],
+    )
+    evolves_with_moon_stone = models.BooleanField(default=False)
+    is_fleeing_species = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["national_dex_number"]

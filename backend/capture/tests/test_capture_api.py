@@ -17,11 +17,56 @@ class CaptureCalculationApiTests(APITestCase):
         PokemonGenerationData.objects.create(
             pokemon=pokemon,
             generation=1,
-            version_group=(
-                PokemonGenerationData.VersionGroup.RED_BLUE
-            ),
+            version_group=(PokemonGenerationData.VersionGroup.RED_BLUE),
             catch_rate=190,
             sprite_url="https://example.com/pikachu.png",
+        )
+
+        moon_stone_pokemon = Pokemon.objects.create(
+            national_dex_number=30,
+            name="Nidorina",
+            slug="nidorina",
+            weight_kg=20,
+            evolves_with_moon_stone=True,
+        )
+
+        PokemonGenerationData.objects.create(
+            pokemon=moon_stone_pokemon,
+            generation=2,
+            version_group=(PokemonGenerationData.VersionGroup.GOLD_SILVER),
+            catch_rate=120,
+            sprite_url="https://example.com/nidorina.png",
+        )
+
+        heavy_ball_pokemon = Pokemon.objects.create(
+            national_dex_number=143,
+            name="Snorlax",
+            slug="snorlax",
+            weight_kg=460,
+        )
+
+        PokemonGenerationData.objects.create(
+            pokemon=heavy_ball_pokemon,
+            generation=2,
+            version_group=(PokemonGenerationData.VersionGroup.GOLD_SILVER),
+            catch_rate=25,
+            sprite_url="https://example.com/snorlax.png",
+        )
+
+        fast_ball_pokemon = Pokemon.objects.create(
+            national_dex_number=81,
+            name="Magnemite",
+            slug="magnemite",
+            weight_kg=6,
+            is_fleeing_species=True,
+        )
+
+        PokemonGenerationData.objects.create(
+            pokemon=fast_ball_pokemon,
+            generation=2,
+            version_group=(PokemonGenerationData.VersionGroup.GOLD_SILVER),
+            catch_rate=190,
+            sprite_url="https://example.com/magnemite.png",
         )
 
         self.valid_payload = {
@@ -100,4 +145,64 @@ class CaptureCalculationApiTests(APITestCase):
         self.assertEqual(
             response.status_code,
             status.HTTP_404_NOT_FOUND,
+        )
+
+    def test_uses_moon_stone_metadata_automatically(self) -> None:
+        payload = {
+            "pokemon_id": Pokemon.objects.get(slug="nidorina").id,
+            "generation": 2,
+            "version_group": "gold-silver",
+            "max_hp": 100,
+            "current_hp": 100,
+            "status": "none",
+            "ball": "moon_ball",
+            "attempts": 1,
+        }
+
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data["calculation_details"]["modified_catch_rate"],
+            255,
+        )
+
+    def test_uses_heavy_ball_weight_metadata_automatically(self) -> None:
+        payload = {
+            "pokemon_id": Pokemon.objects.get(slug="snorlax").id,
+            "generation": 2,
+            "version_group": "gold-silver",
+            "max_hp": 100,
+            "current_hp": 100,
+            "status": "none",
+            "ball": "heavy_ball",
+            "attempts": 1,
+        }
+
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data["calculation_details"]["modified_catch_rate"],
+            65,
+        )
+
+    def test_uses_fast_ball_species_metadata_automatically(self) -> None:
+        payload = {
+            "pokemon_id": Pokemon.objects.get(slug="magnemite").id,
+            "generation": 2,
+            "version_group": "gold-silver",
+            "max_hp": 100,
+            "current_hp": 100,
+            "status": "none",
+            "ball": "fast_ball",
+            "attempts": 1,
+        }
+
+        response = self.client.post(self.url, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data["calculation_details"]["modified_catch_rate"],
+            255,
         )

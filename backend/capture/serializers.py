@@ -60,23 +60,7 @@ class CaptureCalculationInputSerializer(serializers.Serializer):
         allow_null=True,
     )
 
-    wild_pokemon_weight_kg = serializers.FloatField(
-        min_value=0,
-        required=False,
-        allow_null=True,
-    )
-
     is_fishing_encounter = serializers.BooleanField(
-        required=False,
-        default=False,
-    )
-
-    evolves_with_moon_stone = serializers.BooleanField(
-        required=False,
-        default=False,
-    )
-
-    is_fleeing_species = serializers.BooleanField(
         required=False,
         default=False,
     )

@@ -34,7 +34,15 @@ export type BallType =
   | "poke_ball"
   | "great_ball"
   | "ultra_ball"
-  | "master_ball";
+  | "master_ball"
+  | "friend_ball"
+  | "moon_ball"
+  | "fast_ball"
+  | "love_ball"
+  | "level_ball"
+  | "lure_ball"
+  | "sport_ball"
+  | "heavy_ball";
 
 export type CaptureCalculationInput = {
   pokemon_id: number;
@@ -45,6 +53,11 @@ export type CaptureCalculationInput = {
   status: StatusCondition;
   ball: BallType;
   attempts: number;
+  player_pokemon_level?: number | null;
+  wild_pokemon_level?: number | null;
+  is_fishing_encounter?: boolean;
+  is_same_species?: boolean;
+  is_opposite_gender?: boolean;
 };
 
 export type CaptureCalculationResponse = {

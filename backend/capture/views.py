@@ -37,10 +37,10 @@ class CaptureCalculationView(APIView):
             attempts=data["attempts"],
             player_pokemon_level=data.get("player_pokemon_level"),
             wild_pokemon_level=data.get("wild_pokemon_level"),
-            wild_pokemon_weight_kg=data.get("wild_pokemon_weight_kg"),
+            wild_pokemon_weight_kg=float(pokemon_data.pokemon.weight_kg),
             is_fishing_encounter=data.get("is_fishing_encounter", False),
-            evolves_with_moon_stone=data.get("evolves_with_moon_stone", False),
-            is_fleeing_species=data.get("is_fleeing_species", False),
+            evolves_with_moon_stone=(pokemon_data.pokemon.evolves_with_moon_stone),
+            is_fleeing_species=pokemon_data.pokemon.is_fleeing_species,
             is_same_species=data.get("is_same_species", False),
             is_opposite_gender=data.get("is_opposite_gender", False),
         )
