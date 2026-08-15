@@ -27,6 +27,7 @@ services:
 
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
+      INTERNAL_API_URL: ${INTERNAL_API_URL:-http://capturedex-backend:8000/api/v1}
 
     ports:
       - "3000:3000"

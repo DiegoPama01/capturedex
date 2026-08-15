@@ -5,9 +5,18 @@ import type {
   VersionGroup,
 } from "@/features/capture-calculator/types/capture";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://127.0.0.1:8000/api/v1";
+const PUBLIC_API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "/api/v1";
+
+const INTERNAL_API_URL =
+  process.env.INTERNAL_API_URL ??
+  "http://capturedex-backend:8000/api/v1";
+
+function getApiUrl() {
+  return typeof window === "undefined"
+    ? INTERNAL_API_URL
+    : PUBLIC_API_URL;
+}
 
 type GetPokemonParams = {
   search?: string;
@@ -24,24 +33,13 @@ export async function getPokemon({
 }: GetPokemonParams = {}): Promise<PokemonListResponse> {
   const params = new URLSearchParams();
 
-  if (search) {
-    params.set("search", search);
-  }
-
-  if (generation) {
-    params.set("generation", String(generation));
-  }
-
-  if (versionGroup) {
-    params.set("version_group", versionGroup);
-  }
-
-  if (page) {
-    params.set("page", String(page));
-  }
+  if (search) params.set("search", search);
+  if (generation) params.set("generation", String(generation));
+  if (versionGroup) params.set("version_group", versionGroup);
+  if (page) params.set("page", String(page));
 
   const query = params.toString();
-  const url = `${API_URL}/pokemon/${query ? `?${query}` : ""}`;
+  const url = `${getApiUrl()}/pokemon/${query ? `?${query}` : ""}`;
 
   const response = await fetch(url, {
     cache: "no-store",
@@ -58,7 +56,7 @@ export async function calculateCapture(
   input: CaptureCalculationInput,
 ): Promise<CaptureCalculationResponse> {
   const response = await fetch(
-    `${API_URL}/captures/calculate/`,
+    `${getApiUrl()}/captures/calculate/`,
     {
       method: "POST",
       headers: {
