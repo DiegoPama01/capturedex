@@ -52,7 +52,7 @@ class GenerationOneCalculatorTests(SimpleTestCase):
         self.assertEqual(result.cumulative_probability, 1.0)
         self.assertEqual(result.expected_throws, 1.0)
         self.assertTrue(result.guaranteed)
-        
+
     def test_great_ball_can_outperform_ultra_ball(self) -> None:
         common_data = {
             "generation": 1,
@@ -79,4 +79,4 @@ class GenerationOneCalculatorTests(SimpleTestCase):
         self.assertGreater(
             great_ball_result.single_throw_probability,
             ultra_ball_result.single_throw_probability,
-    )
+        )

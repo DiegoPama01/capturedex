@@ -1,10 +1,5 @@
 from rest_framework import serializers
-
-
-SUPPORTED_VERSION_GROUPS = {
-    1: {"red-blue"},
-    2: {"gold-silver", "crystal"},
-}
+from pokemon.version_groups import SUPPORTED_VERSION_GROUPS
 
 
 class PokemonListQuerySerializer(serializers.Serializer):

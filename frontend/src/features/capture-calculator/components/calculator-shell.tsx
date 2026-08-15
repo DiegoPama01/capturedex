@@ -6,6 +6,7 @@ import { EncounterForm } from "./encounter-form";
 import type {
   CaptureCalculationInput,
   CaptureCalculationResponse,
+  Generation,
   Pokemon,
   VersionGroup,
 } from "@/features/capture-calculator/types/capture";
@@ -34,7 +35,7 @@ export function CalculatorShell({
     useState<CaptureCalculationInput>();
   const requestIdRef = useRef(0);
 
-  const generation = versionGroup === "red-blue" ? 1 : 2;
+  const generation = getGenerationFromVersionGroup(versionGroup);
 
   useEffect(() => {
     requestIdRef.current += 1;
@@ -142,7 +143,6 @@ export function CalculatorShell({
         generation={generation}
         versionGroup={versionGroup}
         attempts={attempts}
-        isSubmitting={isCalculating || isLoadingPokemon}
         isLoadingPokemon={isLoadingPokemon}
         isLoadingMorePokemon={isLoadingMorePokemon}
         hasMorePokemon={hasMorePokemon}
@@ -163,4 +163,56 @@ export function CalculatorShell({
       />
     </div>
   );
+}
+
+function getGenerationFromVersionGroup(versionGroup: VersionGroup): Generation {
+  if (versionGroup === "red-blue") {
+    return 1;
+  }
+
+  if (versionGroup === "gold-silver" || versionGroup === "crystal") {
+    return 2;
+  }
+
+  if (
+    versionGroup === "ruby-sapphire" ||
+    versionGroup === "emerald" ||
+    versionGroup === "firered-leafgreen"
+  ) {
+    return 3;
+  }
+
+  if (
+    versionGroup === "diamond-pearl" ||
+    versionGroup === "platinum" ||
+    versionGroup === "heartgold-soulsilver"
+  ) {
+    return 4;
+  }
+
+  if (versionGroup === "black-white" || versionGroup === "black-2-white-2") {
+    return 5;
+  }
+
+  if (versionGroup === "x-y" || versionGroup === "omega-ruby-alpha-sapphire") {
+    return 6;
+  }
+
+  if (
+    versionGroup === "sun-moon" ||
+    versionGroup === "ultra-sun-ultra-moon" ||
+    versionGroup === "lets-go-pikachu-lets-go-eevee"
+  ) {
+    return 7;
+  }
+
+  if (
+    versionGroup === "sword-shield" ||
+    versionGroup === "brilliant-diamond-shining-pearl" ||
+    versionGroup === "legends-arceus"
+  ) {
+    return 8;
+  }
+
+  return 9;
 }

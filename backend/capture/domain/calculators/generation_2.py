@@ -1,4 +1,9 @@
+from typing import cast
+
+from capture.domain.balls.base import GenerationTwoBallEffect
 from capture.domain.calculators.base import BaseCaptureCalculator
+from capture.domain.balls.context import BallContext
+from capture.domain.balls.factory import get_ball_rules
 from capture.domain.enums import BallType, StatusCondition
 from capture.domain.inputs import CaptureInput
 from capture.domain.results import CaptureResult
@@ -49,17 +54,30 @@ class GenerationTwoCalculator(BaseCaptureCalculator):
     ) -> CaptureResult:
         self._validate_generation(capture_input)
 
-        if capture_input.ball == BallType.MASTER_BALL:
-            return self._master_ball_result(capture_input)
-
-        modified_catch_rate = self._modified_catch_rate(
-            catch_rate=capture_input.catch_rate,
-            ball=capture_input.ball,
+        ball_effect = cast(
+            GenerationTwoBallEffect,
+            get_ball_rules(self.generation).resolve(
+                BallContext(
+                    ball=capture_input.ball,
+                    catch_rate=capture_input.catch_rate,
+                    player_pokemon_level=(capture_input.player_pokemon_level),
+                    wild_pokemon_level=capture_input.wild_pokemon_level,
+                    wild_pokemon_weight_kg=(capture_input.wild_pokemon_weight_kg),
+                    is_fishing_encounter=(capture_input.is_fishing_encounter),
+                    evolves_with_moon_stone=(capture_input.evolves_with_moon_stone),
+                    is_fleeing_species=capture_input.is_fleeing_species,
+                    is_same_species=capture_input.is_same_species,
+                    is_opposite_gender=(capture_input.is_opposite_gender),
+                )
+            ),
         )
 
-        status_bonus = self._STATUS_BONUSES[
-            capture_input.status
-        ]
+        if ball_effect.automatic_capture:
+            return self._master_ball_result(capture_input)
+
+        modified_catch_rate = ball_effect.modified_catch_rate
+
+        status_bonus = self._STATUS_BONUSES[capture_input.status]
 
         capture_value = self._calculate_capture_value(
             max_hp=capture_input.max_hp,
@@ -72,9 +90,7 @@ class GenerationTwoCalculator(BaseCaptureCalculator):
         # cuando el resultado es menor o igual que a.
         probability = (capture_value + 1) / 256
 
-        cumulative_probability = (
-            1 - (1 - probability) ** capture_input.attempts
-        )
+        cumulative_probability = 1 - (1 - probability) ** capture_input.attempts
 
         return CaptureResult(
             single_throw_probability=probability,
@@ -88,9 +104,7 @@ class GenerationTwoCalculator(BaseCaptureCalculator):
                 "modified_catch_rate": modified_catch_rate,
                 "status_bonus": status_bonus,
                 "capture_value": capture_value,
-                "shake_threshold": self._shake_threshold(
-                    capture_value
-                ),
+                "shake_threshold": self._shake_threshold(capture_value),
             },
         )
 
@@ -105,29 +119,6 @@ class GenerationTwoCalculator(BaseCaptureCalculator):
             )
 
     @staticmethod
-    def _modified_catch_rate(
-        *,
-        catch_rate: int,
-        ball: BallType,
-    ) -> int:
-        if ball == BallType.POKE_BALL:
-            return catch_rate
-
-        if ball == BallType.GREAT_BALL:
-            # El juego realiza catch_rate + floor(catch_rate / 2).
-            return min(
-                255,
-                catch_rate + catch_rate // 2,
-            )
-
-        if ball == BallType.ULTRA_BALL:
-            return min(255, catch_rate * 2)
-
-        raise ValueError(
-            f"Ball {ball.value} is not supported in Generation II."
-        )
-
-    @staticmethod
     def _calculate_capture_value(
         *,
         max_hp: int,
@@ -135,15 +126,10 @@ class GenerationTwoCalculator(BaseCaptureCalculator):
         modified_catch_rate: int,
         status_bonus: int,
     ) -> int:
-        numerator = (
-            (3 * max_hp - 2 * current_hp)
-            * modified_catch_rate
-        )
+        numerator = (3 * max_hp - 2 * current_hp) * modified_catch_rate
         denominator = 3 * max_hp
 
-        capture_value = (
-            numerator // denominator
-        ) + status_bonus
+        capture_value = (numerator // denominator) + status_bonus
 
         return max(1, min(255, capture_value))
 
@@ -152,15 +138,11 @@ class GenerationTwoCalculator(BaseCaptureCalculator):
         cls,
         capture_value: int,
     ) -> int:
-        for maximum_capture_value, threshold in (
-            cls._SHAKE_THRESHOLDS
-        ):
+        for maximum_capture_value, threshold in cls._SHAKE_THRESHOLDS:
             if capture_value <= maximum_capture_value:
                 return threshold
 
-        raise ValueError(
-            f"Invalid capture value: {capture_value}."
-        )
+        raise ValueError(f"Invalid capture value: {capture_value}.")
 
     @staticmethod
     def _master_ball_result(

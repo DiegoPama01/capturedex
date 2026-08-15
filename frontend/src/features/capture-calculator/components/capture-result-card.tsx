@@ -153,6 +153,10 @@ function SingleProbabilitySection({ probability }: { probability: number }) {
 }
 
 function getVersionGroupLabel(versionGroup: VersionGroup): string {
+  if (versionGroup === "red-blue") {
+    return "Red / Blue";
+  }
+
   if (versionGroup === "gold-silver") {
     return "Gold / Silver";
   }
@@ -161,7 +165,75 @@ function getVersionGroupLabel(versionGroup: VersionGroup): string {
     return "Crystal";
   }
 
-  return "Red / Blue";
+  if (versionGroup === "ruby-sapphire") {
+    return "Ruby / Sapphire";
+  }
+
+  if (versionGroup === "emerald") {
+    return "Emerald";
+  }
+
+  if (versionGroup === "firered-leafgreen") {
+    return "FireRed / LeafGreen";
+  }
+
+  if (versionGroup === "diamond-pearl") {
+    return "Diamond / Pearl";
+  }
+
+  if (versionGroup === "platinum") {
+    return "Platinum";
+  }
+
+  if (versionGroup === "heartgold-soulsilver") {
+    return "HeartGold / SoulSilver";
+  }
+
+  if (versionGroup === "black-white") {
+    return "Black / White";
+  }
+
+  if (versionGroup === "black-2-white-2") {
+    return "Black 2 / White 2";
+  }
+
+  if (versionGroup === "x-y") {
+    return "X / Y";
+  }
+
+  if (versionGroup === "omega-ruby-alpha-sapphire") {
+    return "Omega Ruby / Alpha Sapphire";
+  }
+
+  if (versionGroup === "sun-moon") {
+    return "Sun / Moon";
+  }
+
+  if (versionGroup === "ultra-sun-ultra-moon") {
+    return "Ultra Sun / Ultra Moon";
+  }
+
+  if (versionGroup === "lets-go-pikachu-lets-go-eevee") {
+    return "Let's Go Pikachu / Let's Go Eevee";
+  }
+
+  if (versionGroup === "sword-shield") {
+    return "Sword / Shield";
+  }
+
+  if (versionGroup === "brilliant-diamond-shining-pearl") {
+    return "Brilliant Diamond / Shining Pearl";
+  }
+
+  if (versionGroup === "legends-arceus") {
+    return "Legends: Arceus";
+  }
+
+  if (versionGroup === "scarlet-violet") {
+    return "Scarlet / Violet";
+  }
+
+  return versionGroup;
 }
 
 function CumulativeProbabilitySection({

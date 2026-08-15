@@ -5,7 +5,29 @@ export type GenerationData = {
   sprite_url: string;
 };
 
-export type VersionGroup = "red-blue" | "gold-silver" | "crystal";
+export type Generation = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+
+export type VersionGroup =
+  | "red-blue"
+  | "gold-silver"
+  | "crystal"
+  | "ruby-sapphire"
+  | "emerald"
+  | "firered-leafgreen"
+  | "diamond-pearl"
+  | "platinum"
+  | "heartgold-soulsilver"
+  | "black-white"
+  | "black-2-white-2"
+  | "x-y"
+  | "omega-ruby-alpha-sapphire"
+  | "sun-moon"
+  | "ultra-sun-ultra-moon"
+  | "lets-go-pikachu-lets-go-eevee"
+  | "sword-shield"
+  | "brilliant-diamond-shining-pearl"
+  | "legends-arceus"
+  | "scarlet-violet";
 
 export type Pokemon = {
   id: number;
@@ -34,17 +56,57 @@ export type BallType =
   | "poke_ball"
   | "great_ball"
   | "ultra_ball"
-  | "master_ball";
+  | "master_ball"
+  | "friend_ball"
+  | "moon_ball"
+  | "fast_ball"
+  | "love_ball"
+  | "level_ball"
+  | "lure_ball"
+  | "sport_ball"
+  | "heavy_ball"
+  | "premier_ball"
+  | "nest_ball"
+  | "repeat_ball"
+  | "timer_ball"
+  | "luxury_ball"
+  | "dive_ball"
+  | "net_ball"
+  | "dusk_ball"
+  | "heal_ball"
+  | "quick_ball"
+  | "cherish_ball"
+  | "park_ball"
+  | "dream_ball"
+  | "beast_ball"
+  | "feather_ball"
+  | "wing_ball"
+  | "jet_ball"
+  | "hisui_heavy_ball"
+  | "leaden_ball"
+  | "gigaton_ball"
+  | "origin_ball"
+  | "strange_ball";
 
 export type CaptureCalculationInput = {
   pokemon_id: number;
-  generation: 1 | 2;
+  generation: Generation;
   version_group: VersionGroup;
   max_hp: number;
   current_hp: number;
   status: StatusCondition;
   ball: BallType;
   attempts: number;
+  player_pokemon_level?: number | null;
+  wild_pokemon_level?: number | null;
+  is_fishing_encounter?: boolean;
+  is_surfing_encounter?: boolean;
+  is_underwater_encounter?: boolean;
+  is_dark_location?: boolean;
+  has_caught_species_before?: boolean;
+  is_same_species?: boolean;
+  is_opposite_gender?: boolean;
+  turns_elapsed?: number;
 };
 
 export type CaptureCalculationResponse = {

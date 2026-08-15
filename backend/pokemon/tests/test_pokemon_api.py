@@ -55,6 +55,28 @@ class PokemonListApiTests(APITestCase):
             sprite_url="https://example.com/chikorita-crystal.png",
         )
 
+        treecko = Pokemon.objects.create(
+            national_dex_number=252,
+            name="Treecko",
+            slug="treecko",
+        )
+
+        PokemonGenerationData.objects.create(
+            pokemon=treecko,
+            generation=3,
+            version_group=PokemonGenerationData.VersionGroup.RUBY_SAPPHIRE,
+            catch_rate=45,
+            sprite_url="https://example.com/treecko-rs.png",
+        )
+
+        PokemonGenerationData.objects.create(
+            pokemon=treecko,
+            generation=3,
+            version_group=PokemonGenerationData.VersionGroup.EMERALD,
+            catch_rate=45,
+            sprite_url="https://example.com/treecko-emerald.png",
+        )
+
     def test_lists_generation_one_by_default(self) -> None:
         response = self.client.get(self.url)
 
@@ -133,4 +155,18 @@ class PokemonListApiTests(APITestCase):
         self.assertEqual(
             response.data["version_group"][0],
             "Version group 'red-blue' does not belong to Generation 2.",
+        )
+
+    def test_filters_list_by_generation_three(self) -> None:
+        response = self.client.get(self.url, {"generation": 3})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["name"], "Treecko")
+        self.assertEqual(
+            [
+                generation_data["version_group"]
+                for generation_data in response.data["results"][0]["generation_data"]
+            ],
+            ["ruby-sapphire", "emerald"],
         )

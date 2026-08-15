@@ -9,6 +9,7 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -68,6 +69,8 @@ export function PokeballCombobox({
 
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
+          <CommandInput placeholder="Buscar Pokeball..." />
+
           <CommandList id={listId}>
             <CommandEmpty>No se encontro ninguna Pokeball.</CommandEmpty>
 

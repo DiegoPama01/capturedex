@@ -1,4 +1,9 @@
+from typing import cast
+
+from capture.domain.balls.base import GenerationOneBallEffect
 from capture.domain.calculators.base import BaseCaptureCalculator
+from capture.domain.balls.context import BallContext
+from capture.domain.balls.factory import get_ball_rules
 from capture.domain.enums import BallType, StatusCondition
 from capture.domain.inputs import CaptureInput
 from capture.domain.results import CaptureResult
@@ -6,18 +11,6 @@ from capture.domain.results import CaptureResult
 
 class GenerationOneCalculator(BaseCaptureCalculator):
     generation = 1
-
-    _RANDOM_LIMITS = {
-        BallType.POKE_BALL: 255,
-        BallType.GREAT_BALL: 200,
-        BallType.ULTRA_BALL: 150,
-    }
-
-    _HP_FACTORS = {
-        BallType.POKE_BALL: 12,
-        BallType.GREAT_BALL: 8,
-        BallType.ULTRA_BALL: 12,
-    }
 
     _STATUS_BONUSES = {
         StatusCondition.NONE: 0,
@@ -34,11 +27,21 @@ class GenerationOneCalculator(BaseCaptureCalculator):
     ) -> CaptureResult:
         self._validate_generation(capture_input)
 
-        if capture_input.ball == BallType.MASTER_BALL:
+        ball_effect = cast(
+            GenerationOneBallEffect,
+            get_ball_rules(self.generation).resolve(
+                BallContext(
+                    ball=capture_input.ball,
+                    catch_rate=capture_input.catch_rate,
+                )
+            ),
+        )
+
+        if ball_effect.automatic_capture:
             return self._master_ball_result(capture_input)
 
-        random_limit = self._RANDOM_LIMITS[capture_input.ball]
-        ball_factor = self._HP_FACTORS[capture_input.ball]
+        random_limit = ball_effect.random_limit
+        ball_factor = ball_effect.ball_factor
         status_bonus = self._STATUS_BONUSES[capture_input.status]
 
         hp_value = self._calculate_hp_value(
@@ -47,11 +50,7 @@ class GenerationOneCalculator(BaseCaptureCalculator):
             ball_factor=ball_factor,
         )
 
-        hp_check_probability = (
-            1.0
-            if hp_value > 255
-            else (hp_value + 1) / 256
-        )
+        hp_check_probability = 1.0 if hp_value > 255 else (hp_value + 1) / 256
 
         random_value_count = random_limit + 1
 
@@ -68,16 +67,12 @@ class GenerationOneCalculator(BaseCaptureCalculator):
 
         probability = (
             automatic_success_count / random_value_count
-            + first_check_success_count
-            / random_value_count
-            * hp_check_probability
+            + first_check_success_count / random_value_count * hp_check_probability
         )
 
         probability = min(probability, 1.0)
 
-        cumulative_probability = (
-            1 - (1 - probability) ** capture_input.attempts
-        )
+        cumulative_probability = 1 - (1 - probability) ** capture_input.attempts
 
         return CaptureResult(
             single_throw_probability=probability,
@@ -115,9 +110,7 @@ class GenerationOneCalculator(BaseCaptureCalculator):
     ) -> int:
         reduced_current_hp = max(current_hp // 4, 1)
 
-        return (
-            (max_hp * 255) // ball_factor
-        ) // reduced_current_hp
+        return ((max_hp * 255) // ball_factor) // reduced_current_hp
 
     @staticmethod
     def _first_check_success_count(

@@ -24,7 +24,16 @@ class Command(BaseImportGenerationCommand):
     ) -> None:
         species_data = self.get_species_data(client, national_dex_number)
         pokemon_data = self.get_pokemon_data(client, national_dex_number)
-        pokemon = self.upsert_pokemon(national_dex_number, species_data)
+        evolution_chain_data = self.get_evolution_chain_data(
+            client,
+            species_data,
+        )
+        pokemon = self.upsert_pokemon(
+            national_dex_number,
+            species_data,
+            pokemon_data,
+            evolution_chain_data,
+        )
 
         PokemonGenerationData.objects.update_or_create(
             pokemon=pokemon,
